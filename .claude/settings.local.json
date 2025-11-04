@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill //F //PID 63828)",
+      "Bash(rm:*)",
+      "Bash(cmd //c restart-dev.bat)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(npm run start:*)",
+      "Bash(cat:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(exit 0)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
