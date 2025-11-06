@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Progress } from '@/components/ui/progress'
 import {
   BarChart3,
   TrendingUp,
@@ -62,7 +63,7 @@ export default function AnalyticsPage() {
 
       link.setAttribute('href', url)
       link.setAttribute('download', `analytics-report-${new Date().toISOString().split('T')[0]}.csv`)
-      link.style.visibility = 'hidden'
+      link.className = 'sr-only'
 
       document.body.appendChild(link)
       link.click()
@@ -214,12 +215,7 @@ export default function AnalyticsPage() {
                         <span className="font-medium">{item.month}</span>
                         <span className="text-muted-foreground">{item.count} events</span>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
+                      <Progress value={percentage} className="h-2" />
                     </div>
                   )
                 })}

@@ -178,7 +178,7 @@ export default function AllGuestsPage() {
 
     link.setAttribute('href', url)
     link.setAttribute('download', `all-guests-${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
+    link.className = 'sr-only'
 
     document.body.appendChild(link)
     link.click()

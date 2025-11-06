@@ -321,7 +321,7 @@ export default function EventDetailPage() {
       const link = document.createElement('a')
       link.setAttribute('href', url)
       link.setAttribute('download', `${event?.event_name || 'guests'}-export.csv`)
-      link.style.visibility = 'hidden'
+      link.className = 'sr-only'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

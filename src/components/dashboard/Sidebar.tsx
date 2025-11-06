@@ -129,9 +129,13 @@ export function Sidebar() {
           </Link>
 
           {/* Theme Toggle */}
-          <button
+          <Button
+            variant="ghost"
             onClick={toggleTheme}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground w-full"
+            className={cn(
+              "w-full justify-start gap-3 px-3 py-2 text-sm font-medium",
+              "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
           >
             {theme === 'dark' ? (
               <>
@@ -144,7 +148,7 @@ export function Sidebar() {
                 <span>Dark Mode</span>
               </>
             )}
-          </button>
+          </Button>
         </nav>
       </ScrollArea>
 

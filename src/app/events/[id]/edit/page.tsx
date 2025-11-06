@@ -10,6 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { ArrowLeft, Zap, Sparkles, Check, Loader2, Save } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -304,11 +305,12 @@ export default function EditEventPage() {
                                     />
                                   </FormControl>
                                   <div
-                                    className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                    className={cn(
+                                      "relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all",
                                       isSelected
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:border-primary/50'
-                                    }`}
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border hover:border-primary/50"
+                                    )}
                                   >
                                     <div className="flex-1">
                                       <div className="flex items-center">
