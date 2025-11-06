@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Menu } from 'lucide-react'
 
 export default function EventsLayout({
@@ -33,13 +34,16 @@ export default function EventsLayout({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
+          <VisuallyHidden>
+            <SheetTitle>Navigation Menu</SheetTitle>
+          </VisuallyHidden>
           <Sidebar />
         </SheetContent>
       </Sheet>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6 lg:p-8">{children}</div>
+        <div className="container mx-auto max-w-7xl p-6 lg:p-8">{children}</div>
       </main>
     </div>
   )

@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Menu, User, CreditCard, Sliders, Bell, Shield, Plug } from 'lucide-react'
 
 const settingsTabs = [
@@ -72,6 +73,9 @@ export default function SettingsLayout({
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
+            <VisuallyHidden>
+              <SheetTitle>Navigation Menu</SheetTitle>
+            </VisuallyHidden>
             <Sidebar />
           </SheetContent>
         </Sheet>
@@ -128,6 +132,9 @@ export default function SettingsLayout({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
+          <VisuallyHidden>
+            <SheetTitle>Navigation Menu</SheetTitle>
+          </VisuallyHidden>
           <Sidebar />
         </SheetContent>
       </Sheet>
