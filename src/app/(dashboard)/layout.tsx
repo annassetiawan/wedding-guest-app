@@ -17,7 +17,8 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar with Breadcrumb */}
-        <header className="flex h-14 items-center gap-4 border-b bg-background px-6">
+        <header className="flex items-center gap-4 border-b bg-background px-6 h-[64px]">
+
           <MobileSidebar />
           <BreadcrumbNav />
         </header>
