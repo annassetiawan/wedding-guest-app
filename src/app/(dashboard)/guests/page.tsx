@@ -63,6 +63,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
+import GuestsSkeleton from '@/components/dashboard/GuestsSkeleton'
 
 interface GuestWithEvent extends Guest {
   event?: Event
@@ -216,24 +217,20 @@ export default function AllGuestsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[80vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return <GuestsSkeleton />
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">All Guests</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Manage all guests across all your events
           </p>
         </div>
-        <Button onClick={handleExportCSV} disabled={filteredGuests.length === 0}>
+        <Button onClick={handleExportCSV} disabled={filteredGuests.length === 0} size="lg">
           <Download className="mr-2 h-4 w-4" />
           Export CSV
         </Button>
