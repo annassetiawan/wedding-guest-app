@@ -6,6 +6,69 @@
 
 ---
 
+## 🌓 Theming
+
+**App supports Light/Dark/System themes using next-themes.**
+
+### Theme Toggle
+
+The app includes a theme toggle component accessible from:
+- **Sidebar** - Theme toggle button below navigation
+- **Programmatic access** - Via `useTheme` hook
+
+```tsx
+import { ThemeToggle } from "@/components/theme-toggle"
+
+// Use the theme toggle component
+<ThemeToggle />
+```
+
+### Programmatic Theme Change
+
+```tsx
+import { useTheme } from "next-themes"
+
+const { theme, setTheme } = useTheme()
+
+setTheme("dark")   // Force dark mode
+setTheme("light")  // Force light mode
+setTheme("system") // Follow system preference
+```
+
+### Theme Provider
+
+The app is wrapped with `ThemeProvider` in the root layout:
+
+```tsx
+<ThemeProvider
+  attribute="class"
+  defaultTheme="system"
+  enableSystem
+  disableTransitionOnChange
+>
+  {children}
+</ThemeProvider>
+```
+
+### Color Variables
+
+All colors automatically adapt to the active theme. The app uses oklch color space for better color consistency across light and dark modes.
+
+**IMPORTANT:** Always use CSS variables - NEVER hardcode colors!
+
+```typescript
+// ✅ Correct - Colors adapt to theme
+bg-background       // White in light, dark in dark
+text-foreground     // Dark in light, light in dark
+bg-muted           // Light gray in light, dark gray in dark
+text-muted-foreground  // Gray in both modes
+
+// ❌ Wrong - Fixed colors break theme switching
+bg-white, bg-gray-900, text-black, text-gray-100
+```
+
+---
+
 ## 🎨 Colors
 
 **Always use Shadcn theme tokens:**

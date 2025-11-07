@@ -47,6 +47,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Dialog,
   DialogContent,
@@ -216,11 +217,7 @@ export default function AllGuestsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[80vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return <GuestsPageSkeleton />
   }
 
   return (
@@ -240,49 +237,75 @@ export default function AllGuestsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Guests</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Checked In</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.checkedIn}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.total > 0
-                ? Math.round((stats.checkedIn / stats.total) * 100)
-                : 0}% attendance
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Guests</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.total}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Across all events
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <XCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.notCheckedIn}</div>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-primary" />
+              </div>
+              <Badge variant="default" className="text-xs">
+                {stats.total > 0 ? Math.round((stats.checkedIn / stats.total) * 100) : 0}%
+              </Badge>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Checked In</p>
+              <div className="text-3xl font-bold tracking-tight text-primary">{stats.checkedIn}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Successfully checked in
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Events</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{events.length}</div>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Pending</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.notCheckedIn}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Awaiting check-in
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Events</p>
+              <div className="text-3xl font-bold tracking-tight">{events.length}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Total events created
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -567,6 +590,95 @@ export default function AllGuestsPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+// Skeleton Loading Component
+function GuestsPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-10 w-32" />
+      </div>
+
+      {/* Stats Cards Skeleton */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="relative overflow-hidden border-border">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                {i === 2 && <Skeleton className="h-5 w-12 rounded-md" />}
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-16" />
+              </div>
+              <Skeleton className="h-3 w-32 mt-3" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Filters Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-4 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table Skeleton */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg">
+            <div className="p-4 border-b bg-muted/50">
+              <div className="flex gap-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="p-4 border-b last:border-b-0">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

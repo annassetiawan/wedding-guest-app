@@ -1,22 +1,27 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { getCheckinTimeline, CheckinTimelineData } from '@/lib/services/dashboard-stats'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 
 interface VisitorChartProps {
   period: '7days' | '30days' | '3months'
 }
+
+const chartConfig = {
+  checkins: {
+    label: 'Check-ins',
+    color: 'hsl(var(--primary))',
+  },
+} satisfies ChartConfig
 
 export default function VisitorChart({ period }: VisitorChartProps) {
   const { user } = useAuth()
@@ -67,72 +72,36 @@ export default function VisitorChart({ period }: VisitorChartProps) {
   }
 
   return (
-    <div className="h-[350px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{
-            top: 10,
-            right: 10,
-            left: 0,
-            bottom: 0,
-          }}
-        >
-          <defs>
-            <linearGradient id="colorCheckins" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            className="stroke-muted"
-            vertical={false}
-          />
-          <XAxis
-            dataKey="date"
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            tickLine={false}
-            axisLine={false}
-            allowDecimals={false}
-          />
-          <Tooltip
-            content={({ active, payload }) => {
-              if (active && payload && payload.length) {
-                return (
-                  <div className="rounded-lg border bg-background p-3 shadow-md">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-muted-foreground">
-                        {payload[0].payload.date}
-                      </span>
-                      <span className="text-sm font-bold">
-                        {payload[0].value} Check-ins
-                      </span>
-                    </div>
-                  </div>
-                )
-              }
-              return null
-            }}
-          />
-          <Area
-            type="monotone"
-            dataKey="checkins"
-            stroke="hsl(var(--primary))"
-            strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#colorCheckins)"
-            animationDuration={1000}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <ChartContainer config={chartConfig} className="h-[350px] w-full">
+      <AreaChart
+        accessibilityLayer
+        data={data}
+        margin={{
+          left: 12,
+          right: 12,
+        }}
+      >
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey="date"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          tickFormatter={(value) => value.slice(0, 5)}
+        />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent indicator="line" />}
+        />
+        <Area
+          dataKey="checkins"
+          type="natural"
+          fill="var(--color-checkins)"
+          fillOpacity={0.4}
+          stroke="var(--color-checkins)"
+          stackId="a"
+        />
+      </AreaChart>
+    </ChartContainer>
   )
 }

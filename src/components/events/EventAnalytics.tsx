@@ -3,20 +3,27 @@
 import { Guest } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  BarChart,
   Bar,
-  PieChart,
-  Pie,
-  LineChart,
+  BarChart,
   Line,
+  LineChart,
+  Pie,
+  PieChart,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+  Label,
   Cell,
+  Legend as RechartsLegend,
 } from 'recharts'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart'
 import { Users, UserCheck, Clock, TrendingUp, Calendar } from 'lucide-react'
 import { useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
@@ -25,11 +32,39 @@ interface EventAnalyticsProps {
   guests: Guest[]
 }
 
-const COLORS = {
-  VIP: 'hsl(var(--primary))',
-  Regular: 'hsl(var(--muted))',
-  Family: 'hsl(var(--accent))',
-}
+// Chart configurations
+const categoryChartConfig = {
+  VIP: {
+    label: 'VIP',
+    color: 'hsl(var(--primary))',
+  },
+  Regular: {
+    label: 'Regular',
+    color: 'hsl(var(--muted-foreground))',
+  },
+  Family: {
+    label: 'Family',
+    color: 'hsl(var(--accent))',
+  },
+} satisfies ChartConfig
+
+const attendanceChartConfig = {
+  checkedIn: {
+    label: 'Checked In',
+    color: 'hsl(var(--primary))',
+  },
+  notCheckedIn: {
+    label: 'Not Checked In',
+    color: 'hsl(var(--muted))',
+  },
+} satisfies ChartConfig
+
+const timelineChartConfig = {
+  count: {
+    label: 'Check-ins',
+    color: 'hsl(var(--primary))',
+  },
+} satisfies ChartConfig
 
 export default function EventAnalytics({ guests }: EventAnalyticsProps) {
   // Calculate statistics
@@ -58,9 +93,10 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
   // Category breakdown data for pie chart
   const categoryData = useMemo(() => {
     return Object.entries(stats.categoryBreakdown).map(([category, count]) => ({
-      name: category,
-      value: count,
+      category,
+      count,
       percentage: Math.round((count / stats.total) * 100),
+      fill: `var(--color-${category})`,
     }))
   }, [stats])
 
@@ -89,62 +125,84 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
 
   // Peak hours data for bar chart
   const peakHoursData = useMemo(() => {
-    return timelineData.sort((a, b) => b.count - a.count).slice(0, 10)
+    return [...timelineData].sort((a, b) => b.count - a.count).slice(0, 10)
   }, [timelineData])
 
   // Attendance status data for pie chart
   const attendanceData = [
-    { name: 'Checked In', value: stats.checkedIn, color: 'hsl(142 76% 36%)' },
-    { name: 'Not Checked In', value: stats.notCheckedIn, color: 'hsl(var(--muted))' },
+    {
+      status: 'checkedIn',
+      count: stats.checkedIn,
+      fill: 'var(--color-checkedIn)',
+    },
+    {
+      status: 'notCheckedIn',
+      count: stats.notCheckedIn,
+      fill: 'var(--color-notCheckedIn)',
+    },
   ]
 
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Guests</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">All invited guests</p>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Guests</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.total}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">All invited guests</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Checked In</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.checkedIn}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.attendanceRate}% attendance rate
-            </p>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <UserCheck className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Checked In</p>
+              <div className="text-3xl font-bold tracking-tight text-primary">{stats.checkedIn}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">{stats.attendanceRate}% attendance rate</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.notCheckedIn}</div>
-            <p className="text-xs text-muted-foreground">Not checked in yet</p>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Pending</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.notCheckedIn}</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Not checked in yet</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.attendanceRate}%</div>
-            <p className="text-xs text-muted-foreground">
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Attendance Rate</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.attendanceRate}%</div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
               {stats.checkedIn} of {stats.total} guests
             </p>
           </CardContent>
@@ -160,29 +218,57 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
             <CardDescription>Distribution by guest category</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={categoryChartConfig} className="h-[300px]">
               <PieChart>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
                 <Pie
                   data={categoryData}
+                  dataKey="count"
+                  nameKey="category"
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percentage }) => `${name} (${percentage}%)`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
+                  innerRadius={60}
+                  strokeWidth={5}
                 >
-                  {categoryData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[entry.name as keyof typeof COLORS] || 'hsl(var(--primary))'}
-                    />
-                  ))}
+                  <Label
+                    content={({ viewBox }) => {
+                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                        return (
+                          <text
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                          >
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {stats.total}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground"
+                            >
+                              Guests
+                            </tspan>
+                          </text>
+                        )
+                      }
+                    }}
+                  />
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <ChartLegend
+                  content={<ChartLegendContent nameKey="category" />}
+                  className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+                />
               </PieChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
@@ -193,26 +279,57 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
             <CardDescription>Overall attendance overview</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={attendanceChartConfig} className="h-[300px]">
               <PieChart>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
                 <Pie
                   data={attendanceData}
+                  dataKey="count"
+                  nameKey="status"
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
+                  innerRadius={60}
+                  strokeWidth={5}
                 >
-                  {attendanceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                  <Label
+                    content={({ viewBox }) => {
+                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                        return (
+                          <text
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                          >
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {stats.attendanceRate}%
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground"
+                            >
+                              Attendance
+                            </tspan>
+                          </text>
+                        )
+                      }
+                    }}
+                  />
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <ChartLegend
+                  content={<ChartLegendContent nameKey="status" />}
+                  className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+                />
               </PieChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
@@ -227,22 +344,40 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
               <CardDescription>Guest check-ins over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
+              <ChartContainer config={timelineChartConfig} className="h-[300px]">
+                <LineChart
+                  accessibilityLayer
+                  data={timelineData}
+                  margin={{
+                    left: 12,
+                    right: 12,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="hour"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="line" />}
+                  />
                   <Line
-                    type="monotone"
                     dataKey="count"
-                    stroke="hsl(var(--primary))"
+                    type="natural"
+                    stroke="var(--color-count)"
                     strokeWidth={2}
-                    name="Check-ins"
+                    dot={{
+                      fill: "var(--color-count)",
+                    }}
+                    activeDot={{
+                      r: 6,
+                    }}
                   />
                 </LineChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
 
@@ -253,16 +388,29 @@ export default function EventAnalytics({ guests }: EventAnalyticsProps) {
               <CardDescription>Top 10 busiest hours</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={peakHoursData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" name="Check-ins" />
+              <ChartContainer config={timelineChartConfig} className="h-[300px]">
+                <BarChart
+                  accessibilityLayer
+                  data={peakHoursData}
+                  margin={{
+                    left: 12,
+                    right: 12,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="hour"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dashed" />}
+                  />
+                  <Bar dataKey="count" fill="var(--color-count)" radius={8} />
                 </BarChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
         </div>

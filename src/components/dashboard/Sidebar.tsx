@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
 import { Button } from '@/components/ui/button'
@@ -18,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/theme-toggle'
 import {
   LayoutDashboard,
   Calendar,
@@ -28,8 +28,6 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Moon,
-  Sun,
 } from 'lucide-react'
 
 const navItems = [
@@ -63,7 +61,6 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
-  const { theme, setTheme } = useTheme()
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -75,10 +72,6 @@ export function Sidebar() {
     if (user?.user_metadata?.name) return user.user_metadata.name
     if (user?.email) return user.email.split('@')[0]
     return 'User'
-  }
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   return (
@@ -129,26 +122,9 @@ export function Sidebar() {
           </Link>
 
           {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            onClick={toggleTheme}
-            className={cn(
-              "w-full justify-start gap-3 px-3 py-2 text-sm font-medium",
-              "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="h-5 w-5" />
-                <span>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-5 w-5" />
-                <span>Dark Mode</span>
-              </>
-            )}
-          </Button>
+          <div className="px-3 py-2">
+            <ThemeToggle />
+          </div>
         </nav>
       </ScrollArea>
 
