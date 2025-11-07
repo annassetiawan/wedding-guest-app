@@ -42,26 +42,26 @@ export function BreadcrumbNav() {
   }
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="flex items-center">
+      <BreadcrumbList className="flex items-center">
         {paths.map((path, index) => {
           const href = "/" + paths.slice(0, index + 1).join("/")
           const isLast = index === paths.length - 1
           const label = pathNameMap[path] || path
 
           return (
-            <div key={href} className="flex items-center gap-2">
-              <BreadcrumbItem>
+            <div key={href} className="flex items-center gap-1.5">
+              <BreadcrumbItem className="flex items-center">
                 {isLast ? (
-                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                  <BreadcrumbPage className="line-clamp-1">{label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={href}>{label}</Link>
+                    <Link href={href} className="line-clamp-1">{label}</Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
               {!isLast && (
-                <BreadcrumbSeparator>
+                <BreadcrumbSeparator className="flex items-center">
                   <ChevronRight className="h-4 w-4" />
                 </BreadcrumbSeparator>
               )}
