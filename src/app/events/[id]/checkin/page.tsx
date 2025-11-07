@@ -30,10 +30,10 @@ const ZXingScanner = dynamic(
             <CardTitle>Scanner QR Code</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+            <div className="flex items-center justify-center h-64 bg-muted rounded-lg">
               <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500">Loading scanner...</p>
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Loading scanner...</p>
               </div>
             </div>
           </CardContent>
@@ -43,10 +43,10 @@ const ZXingScanner = dynamic(
             <CardTitle>Pencarian Manual</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+            <div className="flex items-center justify-center h-64 bg-muted rounded-lg">
               <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500">Loading...</p>
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Loading...</p>
               </div>
             </div>
           </CardContent>
@@ -141,7 +141,7 @@ export default function CheckInPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      <header className="bg-background border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -151,8 +151,8 @@ export default function CheckInPage() {
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{event.event_name}</h1>
-                <p className="text-sm text-gray-500">Guest Check-In</p>
+                <h1 className="text-2xl font-bold">{event.event_name}</h1>
+                <p className="text-sm text-muted-foreground">Guest Check-In</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -169,28 +169,28 @@ export default function CheckInPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Guests</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Guests</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-3xl font-bold">{stats.total}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Checked In</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Checked In</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-green-600">{stats.checkedIn}</p>
+              <p className="text-3xl font-bold text-primary">{stats.checkedIn}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-orange-600">{stats.pending}</p>
+              <p className="text-3xl font-bold text-muted-foreground">{stats.pending}</p>
             </CardContent>
           </Card>
         </div>

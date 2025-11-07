@@ -16,7 +16,8 @@
       "Bash(npm uninstall:*)",
       "Bash(exit 0)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"(Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[id]\\page.tsx'' | Measure-Object -Line).Lines\")"
     ],
     "deny": [],
     "ask": []

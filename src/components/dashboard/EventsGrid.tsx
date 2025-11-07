@@ -64,7 +64,7 @@ export default function EventsGrid({ events, onEdit, onDelete }: EventsGridProps
         <p className="text-muted-foreground mb-6 max-w-md mx-auto">
           Mulai dengan membuat event pertama Anda dan kelola daftar tamu dengan mudah
         </p>
-        <Button asChild>
+        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
           <Link href="/events/create">
             <Gift className="h-5 w-5 mr-2" />
             Buat Event Pertama

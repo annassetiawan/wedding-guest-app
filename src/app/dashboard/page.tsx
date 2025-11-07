@@ -3,21 +3,31 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { eventService, EventWithStats } from '@/lib/services/events'
+import { getDashboardStats, DashboardStats } from '@/lib/services/dashboard-stats'
 import { toast } from 'sonner'
-import { Plus, FileText, Download } from 'lucide-react'
+import {
+  Plus,
+  Calendar,
+  CalendarClock,
+  Users,
+  CheckCircle,
+} from 'lucide-react'
 
-import StatsCards from '@/components/dashboard/StatsCards'
-import EventsGrid from '@/components/dashboard/EventsGrid'
+import StatsCard from '@/components/dashboard/StatsCard'
+import VisitorChart from '@/components/dashboard/VisitorChart'
+import RecentEventsTable from '@/components/dashboard/RecentEventsTable'
+import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
-  const [events, setEvents] = useState<EventWithStats[]>([])
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [chartPeriod, setChartPeriod] = useState<'7days' | '30days' | '3months'>('7days')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -27,105 +37,128 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      loadEvents()
+      loadDashboardStats()
     }
   }, [user])
 
-  const loadEvents = async () => {
+  const loadDashboardStats = async () => {
     if (!user) return
 
     try {
       setLoading(true)
-      const data = await eventService.getEventsWithStats(user.id)
-      setEvents(data)
+      const data = await getDashboardStats(user.id)
+      setStats(data)
     } catch (error: any) {
-      toast.error('Gagal memuat events')
-      console.error('Error loading events:', error)
+      toast.error('Gagal memuat dashboard stats')
+      console.error('Error loading dashboard stats:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleEditEvent = (eventId: string) => {
-    router.push(`/events/${eventId}/edit`)
+  if (authLoading || loading) {
+    return <DashboardSkeleton />
   }
 
-  const handleDeleteEvent = (eventId: string) => {
-    router.push(`/events/${eventId}?action=delete`)
-  }
-
-  // Calculate stats
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const totalEvents = events.length
-  const upcomingEvents = events.filter((e) => new Date(e.event_date) >= today).length
-  const totalGuests = events.reduce((sum, event) => sum + event.guest_count, 0)
-  const activeCheckins = events.reduce((sum, event) => sum + event.checked_in_count, 0)
-
-  if (authLoading || (loading && !events.length)) {
-    return (
-      <div className="space-y-8">
-        <StatsCards
-          totalEvents={0}
-          upcomingEvents={0}
-          totalGuests={0}
-          activeCheckins={0}
-          loading={true}
-        />
-      </div>
-    )
-  }
-
-  if (!user) {
+  if (!user || !stats) {
     return null
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats Cards */}
-      <section>
-        <StatsCards
-          totalEvents={totalEvents}
-          upcomingEvents={upcomingEvents}
-          totalGuests={totalGuests}
-          activeCheckins={activeCheckins}
-          loading={loading}
-        />
-      </section>
-
-      <Separator />
-
-      {/* Quick Actions */}
-      <section>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/events/create">
-              <Plus className="h-5 w-5 mr-2" />
-              Buat Event Baru
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" disabled>
-            <Download className="h-5 w-5 mr-2" />
-            Import Data
-          </Button>
-          <Button variant="outline" size="lg" disabled>
-            <FileText className="h-5 w-5 mr-2" />
-            Lihat Laporan
-          </Button>
+    <div className="flex flex-col gap-6 p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Selamat datang kembali, {user.user_metadata?.name || user.email}
+          </p>
         </div>
-      </section>
+        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Link href="/events/create">
+            <Plus className="w-5 h-5 mr-2" />
+            Buat Event Baru
+          </Link>
+        </Button>
+      </div>
 
-      <Separator />
-
-      {/* Events Grid */}
-      <section>
-        <EventsGrid
-          events={events}
-          onEdit={handleEditEvent}
-          onDelete={handleDeleteEvent}
+      {/* Stats Cards Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Events"
+          value={stats.totalEvents}
+          change={stats.eventsChange}
+          trend="Pertumbuhan stabil"
+          subtitle="Semua event yang dibuat"
+          icon={<Calendar className="w-5 h-5 text-blue-600" />}
         />
-      </section>
+
+        <StatsCard
+          title="Upcoming Events"
+          value={stats.upcomingEvents}
+          change={stats.upcomingChange}
+          trend="30 hari ke depan"
+          subtitle="Event yang akan datang"
+          icon={<CalendarClock className="w-5 h-5 text-blue-600" />}
+        />
+
+        <StatsCard
+          title="Total Guests"
+          value={stats.totalGuests}
+          change={stats.guestsChange}
+          trend="Bertambah terus"
+          subtitle="Semua tamu di semua event"
+          icon={<Users className="w-5 h-5 text-blue-600" />}
+        />
+
+        <StatsCard
+          title="Check-ins Hari Ini"
+          value={stats.todayCheckins}
+          change={stats.checkinsChange}
+          trend="Event aktif hari ini"
+          subtitle="Check-in real-time"
+          icon={<CheckCircle className="w-5 h-5 text-blue-600" />}
+        />
+      </div>
+
+      {/* Chart Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle>Aktivitas Check-in</CardTitle>
+              <CardDescription className="mt-1">
+                Total check-in dari waktu ke waktu
+              </CardDescription>
+            </div>
+
+            <Tabs
+              value={chartPeriod}
+              onValueChange={(value) => setChartPeriod(value as typeof chartPeriod)}
+            >
+              <TabsList>
+                <TabsTrigger value="7days">7 Hari</TabsTrigger>
+                <TabsTrigger value="30days">30 Hari</TabsTrigger>
+                <TabsTrigger value="3months">3 Bulan</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <VisitorChart period={chartPeriod} />
+        </CardContent>
+      </Card>
+
+      {/* Recent Events Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Event Terbaru</CardTitle>
+          <CardDescription>5 event terbaru Anda</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RecentEventsTable events={stats.recentEvents} />
+        </CardContent>
+      </Card>
     </div>
   )
 }

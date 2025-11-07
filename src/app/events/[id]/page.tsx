@@ -65,6 +65,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Import guest management dialogs
 import AddGuestDialog from '@/components/events/AddGuestDialog'
@@ -419,14 +420,7 @@ export default function EventDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <p className="mt-4 text-muted-foreground">Loading event...</p>
-        </div>
-      </div>
-    )
+    return <EventDetailSkeleton />
   }
 
   if (!event) {
@@ -439,7 +433,7 @@ export default function EventDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -449,15 +443,15 @@ export default function EventDetailPage() {
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{event.event_name}</h1>
-                <p className="text-sm text-gray-600">
+                <h1 className="text-2xl font-bold">{event.event_name}</h1>
+                <p className="text-sm text-muted-foreground">
                   {event.bride_name} & {event.groom_name} • {formatDate(event.event_date)}
                 </p>
               </div>
             </div>
             <Button
               asChild
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Link href={`/events/${eventId}/checkin`}>
                 <QrCode className="mr-2 h-4 w-4" />
@@ -471,34 +465,58 @@ export default function EventDetailPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <Users className="w-8 h-8 text-gray-600 mb-2" />
-                <p className="text-sm text-muted-foreground">Total Guests</p>
-                <p className="text-2xl font-bold mt-1">{stats.total}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                  <Users className="w-5 h-5 text-primary" />
+                </div>
               </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Guests</p>
+                <div className="text-3xl font-bold tracking-tight">{stats.total}</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                All invited guests
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <UserCheck className="w-8 h-8 text-green-600 mb-2" />
-                <p className="text-sm text-muted-foreground">Sudah Hadir</p>
-                <p className="text-2xl font-bold text-green-600 mt-1">{stats.checkedIn}</p>
+          <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-primary" />
+                </div>
+                <Badge variant="default" className="text-xs">
+                  {stats.total > 0 ? Math.round((stats.checkedIn / stats.total) * 100) : 0}%
+                </Badge>
               </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Sudah Hadir</p>
+                <div className="text-3xl font-bold tracking-tight text-primary">{stats.checkedIn}</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Successfully checked in
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <Clock className="w-8 h-8 text-gray-600 mb-2" />
-                <p className="text-sm text-muted-foreground">Belum Hadir</p>
-                <p className="text-2xl font-bold text-gray-600 mt-1">{stats.notCheckedIn}</p>
+          <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                </div>
               </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Belum Hadir</p>
+                <div className="text-3xl font-bold tracking-tight">{stats.notCheckedIn}</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Awaiting check-in
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -600,8 +618,8 @@ export default function EventDetailPage() {
                 {/* Guest Table */}
                 {filteredGuests.length === 0 ? (
                   <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
                       {searchQuery || filterCategory !== 'all' || filterCheckedIn !== 'all'
                         ? 'No guests found'
                         : 'No guests yet'}
@@ -697,7 +715,7 @@ export default function EventDetailPage() {
                                   onClick={() => handleShareWhatsApp(guest)}
                                   title="Share via WhatsApp"
                                 >
-                                  <Share2 className="h-4 w-4 text-green-600" />
+                                  <Share2 className="h-4 w-4 text-primary" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -755,8 +773,8 @@ export default function EventDetailPage() {
 
                   {recentCheckins.length === 0 ? (
                     <div className="text-center py-12">
-                      <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">
                         No check-ins yet
                       </h3>
                       <p className="text-muted-foreground">
@@ -797,7 +815,7 @@ export default function EventDetailPage() {
                                 </div>
                               </div>
                             </div>
-                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <CheckCircle className="h-5 w-5 text-primary" />
                           </div>
                         </Card>
                       ))}
@@ -940,6 +958,108 @@ export default function EventDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+// Skeleton Loading Component
+function EventDetailSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header Skeleton */}
+      <header className="bg-background border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <div className="space-y-2">
+                <Skeleton className="h-7 w-64" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Skeleton */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="relative overflow-hidden border-border">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  {i === 2 && <Skeleton className="h-5 w-12 rounded-md" />}
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-9 w-16" />
+                </div>
+                <Skeleton className="h-3 w-32 mt-3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Tabs Skeleton */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Search and Filters Skeleton */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-40" />
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="border rounded-lg">
+              <div className="p-4 border-b bg-muted/50">
+                <div className="flex gap-4">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="p-4 border-b last:border-b-0">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   )
 }

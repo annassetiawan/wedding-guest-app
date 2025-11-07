@@ -53,8 +53,8 @@ export default function DeleteGuestDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="p-2 bg-destructive/10 rounded-full">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
               <DialogTitle>Hapus Tamu</DialogTitle>

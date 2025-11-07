@@ -240,8 +240,8 @@ export default function ZXingScanner({
 
           {!isScanning ? (
             <div className="space-y-4">
-              <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-                <div className="text-center text-gray-400">
+              <div className="bg-muted rounded-lg h-64 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
                   <CameraOff className="h-16 w-16 mx-auto mb-4" />
                   <p>Kamera belum aktif</p>
                   <p className="text-xs mt-2">Klik tombol di bawah untuk memulai</p>
@@ -249,7 +249,7 @@ export default function ZXingScanner({
               </div>
               <Button
                 onClick={startScanning}
-                className="w-full bg-green-600 hover:bg-green-700"
+                className="w-full"
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Mulai Scanner
@@ -356,7 +356,7 @@ export default function ZXingScanner({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
             />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Jika scanner tidak berfungsi, gunakan pencarian manual
             </p>
           </div>
@@ -364,7 +364,7 @@ export default function ZXingScanner({
           {searchQuery && (
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredGuests.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-muted-foreground">
                   <Search className="h-12 w-12 mx-auto mb-2" />
                   <p>Tidak ada tamu ditemukan</p>
                 </div>
@@ -382,7 +382,7 @@ export default function ZXingScanner({
                       <div className="flex-1">
                         <p className="font-medium">{guest.name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <p className="text-sm text-gray-600">{guest.phone || '-'}</p>
+                          <p className="text-sm text-muted-foreground">{guest.phone || '-'}</p>
                           <Badge
                             variant={
                               guest.category === 'VIP'

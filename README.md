@@ -15,6 +15,37 @@ A modern wedding guest management application built with Next.js 14, TypeScript,
 **Last Updated:** November 1, 2025
 **Current Phase:** MVP Complete - Analytics & Reporting Implemented ✅
 
+## 🎨 Development Guidelines
+
+**IMPORTANT:** All development must follow the style guide.
+
+- **[STYLEGUIDE.md](./STYLEGUIDE.md)** - Complete design patterns and component guidelines
+- **Design Tokens:** `src/lib/design-tokens.ts` - Programmatic access to design values
+
+### Before Creating Components/Pages:
+
+1. **Read relevant section in STYLEGUIDE.md** - Understand color, typography, and spacing patterns
+2. **Use Shadcn components only** - Never create custom UI with raw Tailwind
+3. **Follow spacing and color patterns** - Use design tokens from `design-tokens.ts`
+4. **Check component checklist** - Review checklist in STYLEGUIDE.md before committing
+5. **No gradients** - Use clean, flat colors (blue-600 for primary actions)
+6. **Test responsively** - Ensure mobile, tablet, and desktop layouts work properly
+
+### Quick Reference:
+
+```typescript
+// Import design tokens
+import { classNames, colors, spacing } from '@/lib/design-tokens'
+
+// Use pre-defined class combinations
+<Card className={classNames.card}>
+<h1 className={classNames.h1}>Title</h1>
+<Button className={classNames.primaryButton}>Action</Button>
+
+// Access color values programmatically
+const primaryColor = colors.primary // 'rgb(37, 99, 235)'
+```
+
 ## 🎨 Dashboard Structure & Navigation
 
 ### Sidebar Menu
