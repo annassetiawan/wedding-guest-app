@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import StatsCard from '@/components/dashboard/StatsCard'
-import VisitorChart from '@/components/dashboard/VisitorChart'
+import MonthlyEventsChart from '@/components/dashboard/MonthlyEventsChart'
 import RecentEventsTable from '@/components/dashboard/RecentEventsTable'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [chartPeriod, setChartPeriod] = useState<'7days' | '30days' | '3months'>('7days')
+  const [chartPeriod, setChartPeriod] = useState<number>(6)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -65,7 +65,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -126,26 +126,26 @@ export default function DashboardPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle>Aktivitas Check-in</CardTitle>
+              <CardTitle>Events Per Bulan</CardTitle>
               <CardDescription className="mt-1">
-                Total check-in dari waktu ke waktu
+                Jumlah event yang dijadwalkan setiap bulan
               </CardDescription>
             </div>
 
             <Tabs
-              value={chartPeriod}
-              onValueChange={(value) => setChartPeriod(value as typeof chartPeriod)}
+              value={chartPeriod.toString()}
+              onValueChange={(value) => setChartPeriod(parseInt(value))}
             >
               <TabsList>
-                <TabsTrigger value="7days">7 Hari</TabsTrigger>
-                <TabsTrigger value="30days">30 Hari</TabsTrigger>
-                <TabsTrigger value="3months">3 Bulan</TabsTrigger>
+                <TabsTrigger value="3">3 Bulan</TabsTrigger>
+                <TabsTrigger value="6">6 Bulan</TabsTrigger>
+                <TabsTrigger value="12">12 Bulan</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
         </CardHeader>
         <CardContent>
-          <VisitorChart period={chartPeriod} />
+          <MonthlyEventsChart months={chartPeriod} />
         </CardContent>
       </Card>
 

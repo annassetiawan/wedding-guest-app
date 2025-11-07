@@ -18,6 +18,11 @@ export interface CheckinTimelineData {
   checkins: number
 }
 
+export interface MonthlyEventsData {
+  month: string
+  events: number
+}
+
 function calculateChange(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0
   return Number((((current - previous) / previous) * 100).toFixed(1))
@@ -223,6 +228,68 @@ export async function getCheckinTimeline(
     return result
   } catch (error) {
     console.error('Error fetching checkin timeline:', error)
+    return []
+  }
+}
+
+export async function getMonthlyEventsData(
+  userId: string,
+  months: number = 6
+): Promise<MonthlyEventsData[]> {
+  const supabase = createClient()
+
+  try {
+    // Get all user events from the last N months
+    const startDate = new Date()
+    startDate.setMonth(startDate.getMonth() - months)
+
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('event_date, created_at')
+      .eq('user_id', userId)
+      .gte('event_date', startDate.toISOString())
+      .order('event_date', { ascending: true })
+
+    if (error) throw error
+
+    if (!events || events.length === 0) {
+      return []
+    }
+
+    // Group events by month
+    const monthlyData: { [key: string]: number } = {}
+
+    events.forEach(event => {
+      const date = new Date(event.event_date)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1
+    })
+
+    // Convert to array with formatted month names
+    const result: MonthlyEventsData[] = Object.entries(monthlyData).map(([monthKey, count]) => {
+      const [year, month] = monthKey.split('-')
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+      const formattedMonth = date.toLocaleDateString('id-ID', {
+        month: 'short',
+        year: 'numeric'
+      })
+
+      return {
+        month: formattedMonth,
+        events: count,
+      }
+    })
+
+    // Sort by date
+    result.sort((a, b) => {
+      const dateA = new Date(a.month)
+      const dateB = new Date(b.month)
+      return dateA.getTime() - dateB.getTime()
+    })
+
+    return result
+  } catch (error) {
+    console.error('Error fetching monthly events data:', error)
     return []
   }
 }
