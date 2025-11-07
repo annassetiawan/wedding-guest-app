@@ -77,14 +77,7 @@ export default function EventsGrid({ events, onEdit, onDelete }: EventsGridProps
   return (
     <div className="space-y-6">
       {/* Header with Search and Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Event Saya</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Kelola dan pantau semua event wedding Anda
-          </p>
-        </div>
-      </div>
+
 
       {/* Search and Tabs */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
