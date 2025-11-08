@@ -29,6 +29,7 @@ import {
   Download,
   ArrowUpDown,
   BarChart3,
+  Eye,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -73,6 +74,7 @@ import EditGuestDialog from '@/components/events/EditGuestDialog'
 import DeleteGuestDialog from '@/components/events/DeleteGuestDialog'
 import GuestQRDialog from '@/components/events/GuestQRDialog'
 import ImportGuestsDialog from '@/components/events/ImportGuestsDialog'
+import { GuestDetailsDialog } from '@/components/events/GuestDetailsDialog'
 import EventAnalytics from '@/components/events/EventAnalytics'
 
 export default function EventDetailPage() {
@@ -96,6 +98,7 @@ export default function EventDetailPage() {
   const [deleteEventOpen, setDeleteEventOpen] = useState(false)
   const [qrDialogOpen, setQrDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [guestDetailsOpen, setGuestDetailsOpen] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -218,6 +221,11 @@ export default function EventDetailPage() {
   const handleViewQR = (guest: Guest) => {
     setSelectedGuest(guest)
     setQrDialogOpen(true)
+  }
+
+  const handleViewDetails = (guest: Guest) => {
+    setSelectedGuest(guest)
+    setGuestDetailsOpen(true)
   }
 
   const handleCopyInvitationLink = (guest: Guest) => {
@@ -646,6 +654,7 @@ export default function EventDetailPage() {
                           <TableHead>Name</TableHead>
                           <TableHead>Phone</TableHead>
                           <TableHead>Category</TableHead>
+                          <TableHead>RSVP</TableHead>
                           <TableHead>Kehadiran</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -680,6 +689,30 @@ export default function EventDetailPage() {
                               </Badge>
                             </TableCell>
                             <TableCell>
+                              <Badge
+                                variant={
+                                  guest.rsvp_status === 'attending'
+                                    ? 'default'
+                                    : guest.rsvp_status === 'not_attending'
+                                    ? 'destructive'
+                                    : 'secondary'
+                                }
+                                className={
+                                  guest.rsvp_status === 'attending'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : guest.rsvp_status === 'not_attending'
+                                    ? 'bg-amber-600 hover:bg-amber-700'
+                                    : ''
+                                }
+                              >
+                                {guest.rsvp_status === 'attending'
+                                  ? 'Hadir'
+                                  : guest.rsvp_status === 'not_attending'
+                                  ? 'Tidak Hadir'
+                                  : 'Pending'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -693,6 +726,14 @@ export default function EventDetailPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleViewDetails(guest)}
+                                  title="View Details"
+                                >
+                                  <Eye className="h-4 w-4 text-primary" />
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -921,6 +962,12 @@ export default function EventDetailPage() {
         onOpenChange={setImportDialogOpen}
         eventId={eventId}
         onSuccess={loadEventData}
+      />
+
+      <GuestDetailsDialog
+        guest={selectedGuest}
+        open={guestDetailsOpen}
+        onOpenChange={setGuestDetailsOpen}
       />
 
       {/* Delete Event Confirmation Dialog */}

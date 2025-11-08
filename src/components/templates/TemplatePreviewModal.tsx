@@ -42,6 +42,9 @@ const sampleGuest: Guest = {
   checked_in_at: undefined,
   qr_code: 'SAMPLE-QR-12345',
   invitation_link: '',
+  rsvp_status: 'pending',
+  rsvp_message: undefined,
+  rsvp_at: undefined,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 }

@@ -7,6 +7,7 @@ import { generateQRCodeDataURL } from '@/lib/utils/qrcode'
 import { Calendar, MapPin, Share2, Download, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import RsvpSection from '@/components/invitation/RsvpSection'
 
 interface ElegantTemplateProps {
   event: Event
@@ -16,6 +17,7 @@ interface ElegantTemplateProps {
 export default function ElegantTemplate({ event, guest }: ElegantTemplateProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [currentGuest, setCurrentGuest] = useState(guest)
 
   useEffect(() => {
     // Fade in animation
@@ -28,6 +30,11 @@ export default function ElegantTemplate({ event, guest }: ElegantTemplateProps) 
       errorCorrectionLevel: 'H',
     }).then(setQrDataUrl)
   }, [guest.qr_code])
+
+  const handleRsvpSuccess = () => {
+    // Refresh guest data after RSVP
+    setCurrentGuest({ ...currentGuest, rsvp_status: currentGuest.rsvp_status })
+  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -188,6 +195,16 @@ export default function ElegantTemplate({ event, guest }: ElegantTemplateProps) 
               </div>
             </div>
           </Card>
+
+          {/* RSVP Section */}
+          <div className="mb-8">
+            <RsvpSection
+              guestId={guest.id}
+              guestName={guest.name}
+              currentStatus={currentGuest.rsvp_status}
+              onSuccess={handleRsvpSuccess}
+            />
+          </div>
 
           {/* QR Code Section */}
           <Card className="p-10 border-2 border-amber-600 bg-amber-50/30 text-center">

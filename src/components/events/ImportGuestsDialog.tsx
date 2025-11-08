@@ -154,6 +154,7 @@ export default function ImportGuestsDialog({
             name: guest.name,
             phone: guest.phone,
             category: guest.category as GuestCategory,
+            rsvp_status: 'pending' as const,
           })
           successCount++
         } catch (error) {

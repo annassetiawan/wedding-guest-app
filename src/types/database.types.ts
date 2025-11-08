@@ -1,4 +1,5 @@
 export type GuestCategory = 'VIP' | 'Regular' | 'Family'
+export type RsvpStatus = 'pending' | 'attending' | 'not_attending'
 
 // Re-export Event types from service for convenience
 export type {
@@ -18,6 +19,9 @@ export interface Guest {
   checked_in: boolean
   checked_in_at?: string
   invitation_link: string
+  rsvp_status: RsvpStatus
+  rsvp_message?: string
+  rsvp_at?: string
   created_at: string
   updated_at: string
 }

@@ -80,6 +80,7 @@ export default function AddGuestDialog({
         name: values.name,
         phone: values.phone || '',
         category: values.category as GuestCategory,
+        rsvp_status: 'pending' as const,
       }
 
       console.log('Guest data to insert:', guestData)

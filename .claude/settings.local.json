@@ -18,7 +18,8 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(powershell -Command \"(Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[id]\\page.tsx'' | Measure-Object -Line).Lines\")",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(powershell -Command \"Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[[]id[]]\\page.tsx'' | Measure-Object -Line | Select-Object -ExpandProperty Lines\")"
     ],
     "deny": [],
     "ask": []
