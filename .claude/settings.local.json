@@ -19,7 +19,9 @@
       "Bash(findstr:*)",
       "Bash(powershell -Command \"(Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[id]\\page.tsx'' | Measure-Object -Line).Lines\")",
       "Bash(xargs:*)",
-      "Bash(powershell -Command \"Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[[]id[]]\\page.tsx'' | Measure-Object -Line | Select-Object -ExpandProperty Lines\")"
+      "Bash(powershell -Command \"Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[[]id[]]\\page.tsx'' | Measure-Object -Line | Select-Object -ExpandProperty Lines\")",
+      "Bash(dir:*)",
+      "Bash(powershell -Command \"Get-ChildItem ''d:\\Claude\\wedding-guest-app\\docs'' | Where-Object { $_Name -like ''*PHASE*'' }\")"
     ],
     "deny": [],
     "ask": []
