@@ -5,8 +5,11 @@ import { useParams, useRouter, notFound } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { eventService, Event } from '@/lib/services/events'
 import { guestService } from '@/lib/services/guests'
+import { vendorService } from '@/lib/services/vendors'
 import { createClient } from '@/lib/supabase/client'
 import { Guest } from '@/types/database.types'
+import type { EventVendorWithDetails } from '@/types/vendor.types'
+import { getCategoryLabel, PAYMENT_STATUS_LABELS } from '@/types/vendor.types'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import {
@@ -30,6 +33,11 @@ import {
   ArrowUpDown,
   BarChart3,
   Eye,
+  Briefcase,
+  DollarSign,
+  Phone,
+  Mail,
+  MapPin,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -74,8 +82,14 @@ import EditGuestDialog from '@/components/events/EditGuestDialog'
 import DeleteGuestDialog from '@/components/events/DeleteGuestDialog'
 import GuestQRDialog from '@/components/events/GuestQRDialog'
 import ImportGuestsDialog from '@/components/events/ImportGuestsDialog'
+
+// Import vendor management dialogs
+import { AssignVendorDialog } from '@/components/events/AssignVendorDialog'
+import { EditVendorAssignmentDialog } from '@/components/events/EditVendorAssignmentDialog'
+import { RemoveVendorDialog } from '@/components/events/RemoveVendorDialog'
 import { GuestDetailsDialog } from '@/components/events/GuestDetailsDialog'
 import EventAnalytics from '@/components/events/EventAnalytics'
+import { EventTimelineWrapper } from '@/components/events/EventTimelineWrapper'
 
 export default function EventDetailPage() {
   const params = useParams()
@@ -85,7 +99,9 @@ export default function EventDetailPage() {
 
   const [event, setEvent] = useState<Event | null>(null)
   const [guests, setGuests] = useState<Guest[]>([])
+  const [vendors, setVendors] = useState<EventVendorWithDetails[]>([])
   const [loading, setLoading] = useState(true)
+  const [vendorsLoading, setVendorsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterCheckedIn, setFilterCheckedIn] = useState<string>('all')
@@ -99,7 +115,11 @@ export default function EventDetailPage() {
   const [qrDialogOpen, setQrDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [guestDetailsOpen, setGuestDetailsOpen] = useState(false)
+  const [assignVendorOpen, setAssignVendorOpen] = useState(false)
+  const [editVendorOpen, setEditVendorOpen] = useState(false)
+  const [removeVendorOpen, setRemoveVendorOpen] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
+  const [selectedVendor, setSelectedVendor] = useState<EventVendorWithDetails | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
@@ -178,6 +198,9 @@ export default function EventDetailPage() {
 
       setEvent(eventData)
       setGuests(guestsData)
+
+      // Load vendors after event data is loaded
+      loadVendors()
     } catch (error: any) {
       console.error('Error loading event:', error)
       // Don't redirect on error - show error state instead
@@ -188,6 +211,19 @@ export default function EventDetailPage() {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadVendors = async () => {
+    try {
+      setVendorsLoading(true)
+      const vendorsData = await vendorService.getEventVendors(eventId)
+      setVendors(vendorsData)
+    } catch (error) {
+      console.error('Error loading vendors:', error)
+      toast.error('Gagal memuat data vendor')
+    } finally {
+      setVendorsLoading(false)
     }
   }
 
@@ -340,6 +376,17 @@ export default function EventDetailPage() {
       toast.error('Failed to export guest list')
       console.error('Error exporting CSV:', error)
     }
+  }
+
+  // Vendor handlers
+  const handleEditVendor = (vendorAssignment: EventVendorWithDetails) => {
+    setSelectedVendor(vendorAssignment)
+    setEditVendorOpen(true)
+  }
+
+  const handleRemoveVendor = (vendorAssignment: EventVendorWithDetails) => {
+    setSelectedVendor(vendorAssignment)
+    setRemoveVendorOpen(true)
   }
 
   const formatDate = (dateString: string) => {
@@ -536,6 +583,10 @@ export default function EventDetailPage() {
               <TabsList className="w-full justify-start">
                 <TabsTrigger value="guests">
                   Guest List ({stats.total})
+                </TabsTrigger>
+                <TabsTrigger value="vendors">
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  Vendors ({vendors.length})
                 </TabsTrigger>
                 <TabsTrigger value="analytics">
                   <BarChart3 className="h-4 w-4 mr-2" />
@@ -792,6 +843,160 @@ export default function EventDetailPage() {
                 )}
               </TabsContent>
 
+              {/* Vendors Tab */}
+              <TabsContent value="vendors" className="mt-0 space-y-6">
+                {/* Actions Bar */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">Assigned Vendors</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Kelola vendor yang di-assign untuk event ini
+                    </p>
+                  </div>
+                  <Button onClick={() => setAssignVendorOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Assign Vendor
+                  </Button>
+                </div>
+
+                {/* Vendors List */}
+                {vendorsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : vendors.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Briefcase className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                      Belum ada vendor yang di-assign
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Mulai assign vendor untuk event ini
+                    </p>
+                    <Button onClick={() => setAssignVendorOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Assign Vendor Pertama
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {vendors.map((vendorAssignment) => (
+                      <Card key={vendorAssignment.id} className="hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                {vendorAssignment.vendor.name}
+                                {vendorAssignment.status === 'confirmed' && (
+                                  <Badge variant="default" className="text-xs">
+                                    Confirmed
+                                  </Badge>
+                                )}
+                                {vendorAssignment.status === 'pending' && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Pending
+                                  </Badge>
+                                )}
+                              </CardTitle>
+                              <CardDescription>
+                                {getCategoryLabel(vendorAssignment.vendor.category)}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Contact Info */}
+                          {(vendorAssignment.vendor.phone || vendorAssignment.vendor.email) && (
+                            <div className="space-y-2 text-sm">
+                              {vendorAssignment.vendor.phone && (
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Phone className="w-4 h-4" />
+                                  <span>{vendorAssignment.vendor.phone}</span>
+                                </div>
+                              )}
+                              {vendorAssignment.vendor.email && (
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Mail className="w-4 h-4" />
+                                  <span className="truncate">{vendorAssignment.vendor.email}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Contract Info */}
+                          {vendorAssignment.contract_amount && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">Nilai Kontrak:</span>
+                                <span className="font-semibold">
+                                  {vendorAssignment.currency === 'USD' ? '$' : 'Rp '}
+                                  {vendorAssignment.contract_amount.toLocaleString()}
+                                </span>
+                              </div>
+                              {vendorAssignment.down_payment && (
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">Down Payment:</span>
+                                  <span className="font-medium">
+                                    {vendorAssignment.currency === 'USD' ? '$' : 'Rp '}
+                                    {vendorAssignment.down_payment.toLocaleString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Payment Status */}
+                          <div className="flex items-center justify-between pt-3 border-t">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-muted-foreground" />
+                              <Badge
+                                variant={
+                                  vendorAssignment.payment_status === 'paid'
+                                    ? 'default'
+                                    : vendorAssignment.payment_status === 'dp_paid'
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                              >
+                                {PAYMENT_STATUS_LABELS[vendorAssignment.payment_status]}
+                              </Badge>
+                            </div>
+
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditVendor(vendorAssignment)}
+                                title="Edit assignment"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveVendor(vendorAssignment)}
+                                title="Hapus vendor"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Notes */}
+                          {vendorAssignment.notes && (
+                            <div className="text-sm text-muted-foreground border-t pt-3">
+                              <p className="font-medium mb-1">Catatan:</p>
+                              <p className="text-xs">{vendorAssignment.notes}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
               {/* Analytics Tab */}
               <TabsContent value="analytics" className="mt-0">
                 <EventAnalytics guests={filteredGuests} />
@@ -799,70 +1004,13 @@ export default function EventDetailPage() {
 
               {/* Timeline Tab */}
               <TabsContent value="timeline" className="mt-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">Recent Check-ins</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Latest 50 guests who checked in
-                      </p>
-                    </div>
-                    <Badge variant="outline">
-                      {recentCheckins.length} check-ins
-                    </Badge>
-                  </div>
-
-                  {recentCheckins.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium mb-2">
-                        No check-ins yet
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Check-ins will appear here as guests arrive
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {recentCheckins.map((guest) => (
-                        <Card key={guest.id} className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center">
-                                <span className="text-primary-foreground font-semibold text-sm">
-                                  {guest.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="font-medium">{guest.name}</div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge
-                                    variant={
-                                      guest.category === 'VIP'
-                                        ? 'default'
-                                        : guest.category === 'Family'
-                                        ? 'secondary'
-                                        : 'outline'
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {guest.category}
-                                  </Badge>
-                                  {guest.checked_in_at && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {formatRelativeTime(guest.checked_in_at)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {event && user && (
+                  <EventTimelineWrapper
+                    eventId={event.id}
+                    eventDate={event.event_date}
+                    userId={user.id}
+                  />
+                )}
               </TabsContent>
 
               {/* Settings Tab */}
@@ -968,6 +1116,29 @@ export default function EventDetailPage() {
         guest={selectedGuest}
         open={guestDetailsOpen}
         onOpenChange={setGuestDetailsOpen}
+      />
+
+      <AssignVendorDialog
+        open={assignVendorOpen}
+        onOpenChange={setAssignVendorOpen}
+        onSuccess={loadVendors}
+        eventId={eventId}
+        userId={user!.id}
+        existingVendorIds={vendors.map((v) => v.vendor_id)}
+      />
+
+      <EditVendorAssignmentDialog
+        open={editVendorOpen}
+        onOpenChange={setEditVendorOpen}
+        onSuccess={loadVendors}
+        vendorAssignment={selectedVendor}
+      />
+
+      <RemoveVendorDialog
+        open={removeVendorOpen}
+        onOpenChange={setRemoveVendorOpen}
+        onSuccess={loadVendors}
+        vendorAssignment={selectedVendor}
       />
 
       {/* Delete Event Confirmation Dialog */}

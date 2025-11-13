@@ -17,6 +17,7 @@ import {
   Settings,
   Sparkles,
   LogOut,
+  Briefcase,
 } from "lucide-react"
 
 const navigation = [
@@ -42,6 +43,11 @@ const navigation = [
         title: "Guests",
         href: "/guests",
         icon: Users,
+      },
+      {
+        title: "Vendors",
+        href: "/vendors",
+        icon: Briefcase,
       },
       {
         title: "Templates",

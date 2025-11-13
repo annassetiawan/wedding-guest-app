@@ -28,6 +28,7 @@ import {
   LogOut,
   User,
   ChevronDown,
+  Briefcase,
 } from 'lucide-react'
 
 const navItems = [
@@ -45,6 +46,11 @@ const navItems = [
     title: 'Guests',
     href: '/guests',
     icon: Users,
+  },
+  {
+    title: 'Vendors',
+    href: '/vendors',
+    icon: Briefcase,
   },
   {
     title: 'Templates',
