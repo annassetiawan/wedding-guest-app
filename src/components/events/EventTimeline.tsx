@@ -36,6 +36,9 @@ import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TimelineItemDialog } from './TimelineItemDialog'
 import { ApplyTemplateDialog } from './ApplyTemplateDialog'
+import { TimelineGanttChart } from './TimelineGanttChart'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { List, BarChart3 } from 'lucide-react'
 
 // ============================================
 // Component Props
@@ -71,6 +74,7 @@ export function EventTimeline({
   const [timeline, setTimeline] = useState<EventTimelineWithVendor[]>([])
   const [stats, setStats] = useState<TimelineStats | null>(null)
   const [liveMode, setLiveMode] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'gantt'>('gantt')
 
   // Check if event is today (enable live mode)
   useEffect(() => {
@@ -325,12 +329,27 @@ export function EventTimeline({
             {stats?.total_items || 0} items • Total durasi: {stats?.total_duration_minutes || 0} menit
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {liveMode && (
             <Badge variant="default" className="animate-pulse">
               Live Mode
             </Badge>
           )}
+
+          {/* View Toggle */}
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'gantt')}>
+            <TabsList>
+              <TabsTrigger value="gantt" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Gantt
+              </TabsTrigger>
+              <TabsTrigger value="list" className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                List
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <Button
             variant="outline"
             size="sm"
@@ -388,16 +407,27 @@ export function EventTimeline({
         </Card>
       )}
 
-      {/* Timeline Items with Drag-Drop */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="timeline-items">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-3"
-            >
-              {timeline.map((item, index) => (
+      {/* Timeline View - Gantt or List */}
+      {viewMode === 'gantt' ? (
+        <TimelineGanttChart
+          timeline={timeline}
+          liveMode={liveMode}
+          onDragEnd={handleDragEnd}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onToggleComplete={handleToggleComplete}
+        />
+      ) : (
+        /* List View */
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="timeline-items">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-3"
+              >
+                {timeline.map((item, index) => (
                 <Draggable key={item.id} draggableId={item.id} index={index}>
                   {(provided, snapshot) => (
                     <Card
@@ -532,6 +562,7 @@ export function EventTimeline({
           )}
         </Droppable>
       </DragDropContext>
+      )}
     </div>
   )
 }
