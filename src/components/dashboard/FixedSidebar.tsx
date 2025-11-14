@@ -163,7 +163,7 @@ export function FixedSidebar() {
 
                   {/* Active Event Expanded Content */}
                   {activeEventExpanded && (
-                    <div className="mt-1 space-y-1 border-l ml-7 pl-3 pr-3">
+                    <div className="mt-1 space-y-1 border-l ml-5 pl-3 pr-3">
                       {/* Event Selector */}
                       <div className="mb-2">
                         <DropdownMenu>
