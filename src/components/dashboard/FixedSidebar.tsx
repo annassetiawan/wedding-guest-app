@@ -169,7 +169,7 @@ export function FixedSidebar() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
-                              className="flex w-full items-center gap-2 rounded-lg border border-input bg-background px-2 py-2 text-sm hover:bg-secondary/50 transition-colors"
+                              className="flex w-full items-center gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm hover:bg-secondary/50 transition-colors"
                               title={`${activeEvent.event_name} - ${new Date(activeEvent.event_date).toLocaleDateString('en-US', {
                                 month: 'long',
                                 day: 'numeric',
