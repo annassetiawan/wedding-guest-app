@@ -1,4 +1,4 @@
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import { FixedSidebar } from '@/components/dashboard/FixedSidebar'
 import { MobileSidebar } from '@/components/dashboard/MobileSidebar'
 import { BreadcrumbNav } from '@/components/dashboard/BreadcrumbNav'
 
@@ -11,7 +11,7 @@ export default function AnalyticsLayout({
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col">
-        <DashboardSidebar />
+        <FixedSidebar />
       </aside>
 
       {/* Main Content */}

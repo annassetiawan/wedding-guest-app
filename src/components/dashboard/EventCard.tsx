@@ -1,6 +1,7 @@
 'use client'
 
 import { EventWithStats } from '@/lib/services/events'
+import { useActiveEvent } from '@/contexts/EventContext'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import { Calendar, MapPin, Users, MoreVertical, Edit, Trash2, QrCode, TrendingUp
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { format, isToday, isFuture, isPast } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 
@@ -24,6 +26,15 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
+  const router = useRouter()
+  const { setActiveEvent } = useActiveEvent()
+
+  const handleCardClick = () => {
+    // Set this event as active
+    setActiveEvent(event.id, event)
+    // Navigate to event overview
+    router.push(`/events/${event.id}/overview`)
+  }
   const eventDate = new Date(event.event_date)
 
   const isTodayEvent = isToday(eventDate)
@@ -66,7 +77,7 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
         </div>
       </div>
 
-      <Link href={`/events/${event.id}`}>
+      <div onClick={handleCardClick} className="cursor-pointer">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between pr-14">
             <div className="flex-1 min-w-0">
@@ -136,11 +147,11 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
             <Progress value={checkinPercentage} className="h-2" />
           </div>
         </CardContent>
-      </Link>
+      </div>
 
       <CardFooter className="bg-muted/30 border-t pt-4 pb-4 gap-2">
-        <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-          <Link href={`/events/${event.id}`}>Lihat Detail</Link>
+        <Button onClick={handleCardClick} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+          Lihat Detail
         </Button>
 
         <DropdownMenu>

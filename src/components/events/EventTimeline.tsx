@@ -120,8 +120,12 @@ export function EventTimeline({
       setStats({
         total_items: 0,
         completed_items: 0,
+        pending_items: 0,
         total_duration_minutes: 0,
         completion_percentage: 0,
+        estimated_end_time: '00:00',
+        items_with_pic: 0,
+        items_without_pic: 0,
       })
     } finally {
       setLoading(false)

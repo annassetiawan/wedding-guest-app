@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import { FixedSidebar } from '@/components/dashboard/FixedSidebar'
 import { MobileSidebar } from '@/components/dashboard/MobileSidebar'
 import { BreadcrumbNav } from '@/components/dashboard/BreadcrumbNav'
 import { User, CreditCard, Sliders, Bell, Shield, Plug } from 'lucide-react'
@@ -52,7 +52,7 @@ export default function SettingsLayout({
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col">
-        <DashboardSidebar />
+        <FixedSidebar />
       </aside>
 
       {/* Main Content */}

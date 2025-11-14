@@ -3,7 +3,10 @@
     "allow": [
       "Bash(powershell -Command \"Get-Content ''d:\\Claude\\wedding-guest-app\\src\\app\\events\\[id]\\page.tsx'' | Measure-Object -Line | Select-Object -ExpandProperty Lines\")",
       "Bash(timeout 15 bash:*)",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
