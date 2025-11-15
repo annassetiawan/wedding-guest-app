@@ -53,21 +53,21 @@
   /* New York Theme - Blue Primary */
   --radius: 0.5rem;
 
-  /* Base colors */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  /* Base colors - Light Mode */
+  --background: 0 0% 100%;             /* #ffffff - Pure white background */
+  --foreground: 222.2 84% 4.9%;        /* Dark text */
 
   /* Card */
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;                   /* #ffffff - Same white as background */
+  --card-foreground: 222.2 84% 4.9%;   /* Dark text */
 
   /* Popover */
-  --popover: 0 0% 100%;
+  --popover: 0 0% 100%;                /* #ffffff - White popover */
   --popover-foreground: 222.2 84% 4.9%;
 
-  /* Primary - Blue */
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
+  /* Primary - Blue (#3b82f6) */
+  --primary: 217.2 91.2% 59.8%;        /* #3b82f6 - Same blue as dark mode */
+  --primary-foreground: 0 0% 100%;     /* White text on blue */
 
   /* Secondary */
   --secondary: 210 40% 96.1%;
@@ -88,82 +88,82 @@
   /* Border, Input, Ring */
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --ring: 217.2 91.2% 59.8%;           /* Blue focus ring */
 
   /* Chart colors */
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  --chart-1: 217.2 91.2% 59.8%;        /* Blue theme for consistency */
+  --chart-2: 221.2 83.2% 53.3%;
+  --chart-3: 223.8 88.5% 44.9%;
+  --chart-4: 217.2 91.2% 69.8%;
+  --chart-5: 213.6 93.9% 67.8%;
 
-  /* Sidebar */
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222.2 84% 4.9%;
-  --sidebar-primary: 221.2 83.2% 53.3%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 210 40% 96.1%;
-  --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-  --sidebar-border: 214.3 31.8% 91.4%;
-  --sidebar-ring: 221.2 83.2% 53.3%;
+  /* Sidebar - Light mode */
+  --sidebar: 0 0% 98%;                 /* #fafafa - Same as background for unified look */
+  --sidebar-foreground: 222.2 84% 4.9%; /* Dark text */
+  --sidebar-primary: 217.2 91.2% 59.8%; /* #3b82f6 - Active blue */
+  --sidebar-primary-foreground: 0 0% 100%; /* White text on blue */
+  --sidebar-accent: 220 14% 93%;       /* #eeeff1 - Subtle hover gray */
+  --sidebar-accent-foreground: 222.2 84% 4.9%;
+  --sidebar-border: 220 13% 91%;       /* Light border */
+  --sidebar-ring: 217.2 91.2% 59.8%;   /* Blue ring */
 }
 
 .dark {
-  /* New York Theme - Blue Primary (Dark Mode) */
+  /* Custom Dark Theme - Wedding Guest Manager */
 
-  /* Base colors */
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  /* Base colors - Deep blacks with clear distinction */
+  --background: 0 0% 3%;           /* #080808 - Primary background (deepest black) */
+  --foreground: 0 0% 100%;         /* #ffffff - Primary text (white) */
 
-  /* Card */
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+  /* Card - Slightly lighter than background */
+  --card: 0 0% 10%;                /* #1a1a1a - Card background (dark gray) */
+  --card-foreground: 0 0% 100%;    /* #ffffff - Card text */
 
   /* Popover */
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 0 0% 11%;             /* #1c1c1c - Popover background */
+  --popover-foreground: 0 0% 100%; /* #ffffff - Popover text */
 
-  /* Primary - Blue */
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  /* Primary - Blue (#3b82f6) */
+  --primary: 217.2 91.2% 59.8%;    /* #3b82f6 - Primary blue */
+  --primary-foreground: 0 0% 100%; /* #ffffff - Text on primary */
 
-  /* Secondary */
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  /* Secondary - Darker background for secondary elements */
+  --secondary: 0 0% 13%;           /* #212121 - Secondary background */
+  --secondary-foreground: 0 0% 61%; /* #9ca3af - Secondary text (gray) */
 
-  /* Muted */
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  /* Muted - For less prominent elements */
+  --muted: 0 0% 10%;               /* #1a1a1a - Muted background */
+  --muted-foreground: 220 9% 46%;  /* #6b7280 - Muted text (gray) */
 
-  /* Accent */
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  /* Accent - For hover states and accents */
+  --accent: 0 0% 13%;              /* #222222 - Accent/hover background */
+  --accent-foreground: 0 0% 100%;  /* #ffffff - Accent text */
 
   /* Destructive */
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 0 84.2% 60.2%;    /* Red for destructive actions */
+  --destructive-foreground: 0 0% 100%;
 
   /* Border, Input, Ring */
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --border: 0 0% 16%;              /* #2a2a2a - Subtle borders */
+  --input: 0 0% 10%;               /* #1a1a1a - Input background */
+  --ring: 217.2 91.2% 59.8%;       /* #3b82f6 - Focus ring (blue) */
 
-  /* Chart colors */
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  /* Chart colors - Blue gradient theme */
+  --chart-1: 217.2 91.2% 59.8%;    /* #3b82f6 - Primary blue */
+  --chart-2: 221.2 83.2% 53.3%;    /* #2563eb - Darker blue */
+  --chart-3: 223.8 88.5% 44.9%;    /* #1e40af - Deep blue */
+  --chart-4: 217.2 91.2% 69.8%;    /* Lighter blue variant */
+  --chart-5: 213.6 93.9% 67.8%;    /* Sky blue variant */
 
-  /* Sidebar */
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 217.2 91.2% 59.8%;
-  --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-ring: 224.3 76.3% 48%;
+  /* Sidebar - Visibly lighter than background */
+  --sidebar: 0 0% 8%;              /* #141414 - Sidebar background (lighter than main bg) */
+  --sidebar-foreground: 0 0% 100%; /* #ffffff - Sidebar text */
+  --sidebar-primary: 217.2 91.2% 59.8%; /* #3b82f6 - Active blue */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 13%;      /* #222222 - Hover state */
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 0 0% 16%;      /* #2a2a2a - Subtle border */
+  --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
 @layer base {
@@ -172,5 +172,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth transitions for hover states */
+  button,
+  a,
+  [role="button"] {
+    @apply transition-colors duration-200 ease-in-out;
+  }
+
+  /* Improved card hover transitions */
+  [class*="card"],
+  [class*="Card"] {
+    @apply transition-all duration-200 ease-in-out;
   }
 }

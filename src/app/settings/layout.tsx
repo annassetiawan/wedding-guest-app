@@ -51,7 +51,7 @@ export default function SettingsLayout({
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col">
+      <aside className="hidden md:flex flex-col">
         <FixedSidebar />
       </aside>
 

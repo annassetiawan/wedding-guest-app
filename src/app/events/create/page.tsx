@@ -367,7 +367,7 @@ export default function CreateEventPage() {
                     type="submit"
                     size="lg"
                     disabled={form.formState.isSubmitting}
-                    className="min-w-[160px] bg-blue-600 hover:bg-blue-700 text-white"
+                    className="min-w-[160px]"
                   >
                     {form.formState.isSubmitting ? (
                       <>

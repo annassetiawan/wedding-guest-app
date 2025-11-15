@@ -78,7 +78,7 @@ export default function EventsPage() {
             Kelola semua event wedding Anda
           </p>
         </div>
-        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button asChild size="lg">
           <Link href="/events/create">
             <Plus className="w-5 h-5 mr-2" />
             Buat Event Baru

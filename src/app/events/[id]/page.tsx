@@ -506,7 +506,6 @@ export default function EventDetailPage() {
             </div>
             <Button
               asChild
-              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Link href={`/events/${eventId}/checkin`}>
                 <QrCode className="mr-2 h-4 w-4" />

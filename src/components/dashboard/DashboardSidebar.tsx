@@ -83,7 +83,7 @@ export function DashboardSidebar() {
   const { signOut } = useAuth()
 
   return (
-    <div className="flex h-full flex-col border-r bg-background">
+    <div className="flex h-full flex-col border-r bg-sidebar">
       {/* Logo */}
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/dashboard" className="flex items-center gap-2">
@@ -117,8 +117,8 @@ export function DashboardSidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         isActive
-                          ? "bg-secondary text-secondary-foreground font-medium"
-                          : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
+                          : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                       )}
                     >
                       <Icon className="h-4 w-4" />

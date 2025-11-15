@@ -78,16 +78,20 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
       </div>
 
       <div onClick={handleCardClick} className="cursor-pointer">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between pr-14">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-foreground truncate group-hover:text-primary transition-colors mb-2">
-                {event.event_name}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {event.bride_name} & {event.groom_name}
-              </p>
-            </div>
+        <CardHeader className="pb-3 !pr-16">
+          <div className="min-w-0 max-w-[calc(100%-3.5rem)]">
+            <h3
+              className="text-xl font-bold text-foreground truncate group-hover:text-primary transition-colors mb-2"
+              title={event.event_name}
+            >
+              {event.event_name}
+            </h3>
+            <p
+              className="text-sm text-muted-foreground truncate"
+              title={`${event.bride_name} & ${event.groom_name}`}
+            >
+              {event.bride_name} & {event.groom_name}
+            </p>
           </div>
         </CardHeader>
 
@@ -108,13 +112,13 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
           {/* Date */}
           <div className="flex items-center text-sm text-muted-foreground">
             <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>{format(eventDate, 'd MMMM yyyy, EEEE', { locale: idLocale })}</span>
+            <span className="truncate">{format(eventDate, 'd MMMM yyyy, EEEE', { locale: idLocale })}</span>
           </div>
 
           {/* Venue */}
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">{event.venue}</span>
+            <span className="truncate" title={event.venue}>{event.venue}</span>
           </div>
 
           {/* Stats Row */}
@@ -150,7 +154,7 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
       </div>
 
       <CardFooter className="bg-muted/30 border-t pt-4 pb-4 gap-2">
-        <Button onClick={handleCardClick} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button onClick={handleCardClick} className="flex-1">
           Lihat Detail
         </Button>
 

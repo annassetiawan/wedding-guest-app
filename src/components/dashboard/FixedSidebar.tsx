@@ -34,6 +34,8 @@ import {
   Users,
   TrendingUp,
   Clock,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react'
 
 export function FixedSidebar() {
@@ -44,6 +46,14 @@ export function FixedSidebar() {
   const [events, setEvents] = useState<Event[]>([])
   const [loadingEvents, setLoadingEvents] = useState(true)
   const [activeEventExpanded, setActiveEventExpanded] = useState(true)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Initialize from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar-collapsed')
+      return saved === 'true'
+    }
+    return false
+  })
 
   // Load user events for selector
   useEffect(() => {
@@ -51,6 +61,13 @@ export function FixedSidebar() {
       loadEvents()
     }
   }, [user])
+
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-collapsed', String(isCollapsed))
+    }
+  }, [isCollapsed])
 
   // Auto-collapse when navigating away from event pages
   useEffect(() => {
@@ -92,10 +109,28 @@ export function FixedSidebar() {
   }
 
   return (
-    <div className="flex h-full w-64 min-w-64 flex-col bg-background border-r overflow-hidden">
-      {/* Logo Section */}
-      <div className="flex h-14 items-center px-4 border-b shrink-0">
-        <Logo />
+    <div
+      className={cn(
+        "flex h-full flex-col bg-sidebar border-r border-sidebar-border overflow-hidden transition-all duration-300",
+        isCollapsed ? "w-16 min-w-16" : "w-64 min-w-64"
+      )}
+    >
+      {/* Logo Section with Toggle */}
+      <div className="flex h-14 items-center border-b px-4 justify-between shrink-0">
+        {!isCollapsed && <Logo />}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="shrink-0"
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <PanelLeft className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -103,50 +138,56 @@ export function FixedSidebar() {
         <nav className="space-y-1 px-3 overflow-hidden">
           {/* Platform Section */}
           <div className="mb-4 overflow-hidden">
-            <div className="px-2 mb-2">
-              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                Platform
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="px-2 mb-2">
+                <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                  Platform
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               {/* Dashboard */}
               <Link
                 href="/dashboard"
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  'flex items-center rounded-lg text-sm transition-colors',
                   pathname === '/dashboard'
-                    ? 'bg-secondary text-secondary-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                    : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                  isCollapsed ? 'justify-center h-10 w-10 mx-auto p-0' : 'gap-3 px-3 py-2'
                 )}
+                title={isCollapsed ? 'Dashboard' : ''}
               >
-                <LayoutDashboard className="h-4 w-4" />
-                <span>Dashboard</span>
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>Dashboard</span>}
               </Link>
 
               {/* All Events */}
               <Link
                 href="/events"
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  'flex items-center rounded-lg text-sm transition-colors',
                   pathname === '/events' && !pathname.includes('/events/')
-                    ? 'bg-secondary text-secondary-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                    : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                  isCollapsed ? 'justify-center h-10 w-10 mx-auto p-0' : 'gap-3 px-3 py-2'
                 )}
+                title={isCollapsed ? 'All Events' : ''}
               >
-                <Calendar className="h-4 w-4" />
-                <span>All Events</span>
+                <Calendar className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>All Events</span>}
               </Link>
 
               {/* Active Event - Collapsible Menu Item */}
-              {activeEvent && activeEventId && (
+              {activeEvent && activeEventId && !isCollapsed && (
                 <>
                   <button
                     onClick={() => setActiveEventExpanded(!activeEventExpanded)}
                     className={cn(
                       'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
                       pathname.includes(`/events/${activeEventId}`)
-                        ? 'bg-secondary text-secondary-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -169,7 +210,7 @@ export function FixedSidebar() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
-                              className="flex text-left items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm hover:bg-secondary/50 transition-colors w-[184px]"
+                              className="flex text-left items-center justify-between gap-2 rounded-lg border border-sidebar-border bg-sidebar px-3 py-2 text-sm hover:bg-sidebar-accent transition-colors w-[184px]"
                               title={`${activeEvent.event_name} - ${new Date(activeEvent.event_date).toLocaleDateString('en-US', {
                                 month: 'long',
                                 day: 'numeric',
@@ -203,7 +244,7 @@ export function FixedSidebar() {
                                 }}
                                 className={cn(
                                   'cursor-pointer text-xs',
-                                  activeEventId === event.id && 'bg-secondary'
+                                  activeEventId === event.id && 'bg-sidebar-accent'
                                 )}
                                 title={`${event.event_name} - ${new Date(event.event_date).toLocaleDateString('en-US', {
                                   month: 'long',
@@ -233,8 +274,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/overview`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <Home className="h-4 w-4" />
@@ -246,8 +287,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/guests`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <Users className="h-4 w-4" />
@@ -259,8 +300,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/vendors`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <Briefcase className="h-4 w-4" />
@@ -272,8 +313,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/analytics`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <TrendingUp className="h-4 w-4" />
@@ -285,8 +326,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/timeline`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <Clock className="h-4 w-4" />
@@ -298,8 +339,8 @@ export function FixedSidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                           pathname === `/events/${activeEventId}/settings`
-                            ? 'bg-secondary text-secondary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                         )}
                       >
                         <Settings className="h-4 w-4" />
@@ -314,46 +355,57 @@ export function FixedSidebar() {
               <Link
                 href="/vendors"
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  'flex items-center rounded-lg text-sm transition-colors',
                   pathname === '/vendors'
-                    ? 'bg-secondary text-secondary-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                    : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                  isCollapsed ? 'justify-center h-10 w-10 mx-auto p-0' : 'gap-3 px-3 py-2'
                 )}
+                title={isCollapsed ? 'Vendors' : ''}
               >
-                <Briefcase className="h-4 w-4" />
-                <span>Vendors</span>
+                <Briefcase className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>Vendors</span>}
               </Link>
 
               {/* Settings */}
               <Link
                 href="/settings"
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  'flex items-center rounded-lg text-sm transition-colors',
                   pathname.startsWith('/settings')
-                    ? 'bg-secondary text-secondary-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
+                    : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                  isCollapsed ? 'justify-center h-10 w-10 mx-auto p-0' : 'gap-3 px-3 py-2'
                 )}
+                title={isCollapsed ? 'Settings' : ''}
               >
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+                <Settings className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>Settings</span>}
               </Link>
             </div>
           </div>
 
           {/* Preferences Section */}
-          <div>
-            <div className="px-2 mb-2">
-              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                Preferences
-              </p>
-            </div>
-            <div className="px-2 py-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Theme</span>
-                <ThemeToggle />
+          {!isCollapsed && (
+            <div>
+              <div className="px-2 mb-2">
+                <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                  Preferences
+                </p>
+              </div>
+              <div className="px-2 py-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Theme</span>
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+          {isCollapsed && (
+            <div className="flex justify-center py-1.5">
+              <ThemeToggle />
+            </div>
+          )}
         </nav>
       </ScrollArea>
 
@@ -363,20 +415,29 @@ export function FixedSidebar() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="w-full justify-start gap-2 px-2 h-auto py-2 hover:bg-accent"
+              className={cn(
+                "hover:bg-sidebar-accent",
+                isCollapsed
+                  ? "h-10 w-10 mx-auto p-0 flex items-center justify-center"
+                  : "w-full gap-2 px-2 h-auto py-2 justify-start"
+              )}
             >
               <Avatar className="h-8 w-8 rounded-md">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs rounded-md">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-1 flex-col items-start text-left">
-                <span className="text-xs font-medium leading-none">{getUserName()}</span>
-                <span className="text-[10px] text-muted-foreground truncate max-w-[130px] mt-0.5">
-                  {user?.email}
-                </span>
-              </div>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              {!isCollapsed && (
+                <>
+                  <div className="flex flex-1 flex-col items-start text-left">
+                    <span className="text-xs font-medium leading-none">{getUserName()}</span>
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[130px] mt-0.5">
+                      {user?.email}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
