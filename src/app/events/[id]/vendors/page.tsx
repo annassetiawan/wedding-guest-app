@@ -21,6 +21,19 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { SearchFilterBar, FilterOption } from '@/components/layout/SearchFilterBar'
 
 // Import vendor management dialogs
 import { AssignVendorDialog } from '@/components/events/AssignVendorDialog'
@@ -38,6 +51,11 @@ export default function EventVendorsPage() {
   const [vendors, setVendors] = useState<EventVendorWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [vendorsLoading, setVendorsLoading] = useState(false)
+
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('all')
 
   // Dialog states
   const [assignVendorOpen, setAssignVendorOpen] = useState(false)
@@ -93,6 +111,33 @@ export default function EventVendorsPage() {
     setRemoveVendorOpen(true)
   }
 
+  // Filter vendors based on search and filters
+  const getFilteredVendors = () => {
+    return vendors.filter((vendor) => {
+      // Search filter
+      const matchesSearch =
+        searchQuery === '' ||
+        vendor.vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.vendor.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.vendor.email?.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // Status filter
+      const matchesStatus =
+        filterStatus === 'all' || vendor.status === filterStatus
+
+      // Payment status filter
+      const matchesPaymentStatus =
+        filterPaymentStatus === 'all' || vendor.payment_status === filterPaymentStatus
+
+      return matchesSearch && matchesStatus && matchesPaymentStatus
+    })
+  }
+
+  const handleFilterChange = (key: string, value: string) => {
+    if (key === 'status') setFilterStatus(value)
+    if (key === 'payment_status') setFilterPaymentStatus(value)
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -111,116 +156,147 @@ export default function EventVendorsPage() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Event Vendors</h1>
-          <p className="text-muted-foreground">
-            Kelola vendor yang di-assign untuk {event.event_name}
-          </p>
-        </div>
-        <Button onClick={() => setAssignVendorOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Assign Vendor
-        </Button>
-      </div>
+  const filteredVendors = getFilteredVendors()
 
-      {/* Vendors List */}
+  const filterOptions: FilterOption[] = [
+    {
+      key: 'status',
+      label: 'Status',
+      options: [
+        { value: 'all', label: 'All Status' },
+        { value: 'confirmed', label: 'Confirmed' },
+        { value: 'pending', label: 'Pending' },
+      ],
+      defaultValue: filterStatus,
+    },
+    {
+      key: 'payment_status',
+      label: 'Payment Status',
+      options: [
+        { value: 'all', label: 'All Payments' },
+        { value: 'paid', label: 'Paid' },
+        { value: 'dp_paid', label: 'DP Paid' },
+        { value: 'unpaid', label: 'Unpaid' },
+      ],
+      defaultValue: filterPaymentStatus,
+    },
+  ]
+
+  return (
+    <PageLayout>
+      <PageHeader
+        title="Event Vendors"
+        subtitle={`Kelola vendor yang di-assign untuk ${event.event_name}`}
+        action={
+          <Button onClick={() => setAssignVendorOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Assign Vendor
+          </Button>
+        }
+      />
+
+      <SearchFilterBar
+        searchable
+        searchPlaceholder="Search vendors by name, phone, or email..."
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filterOptions}
+        onFilterChange={handleFilterChange}
+      />
+
+      {/* Vendors Table */}
       {vendorsLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
-      ) : vendors.length === 0 ? (
+      ) : filteredVendors.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <Briefcase className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">
-                Belum ada vendor yang di-assign
+                {vendors.length === 0
+                  ? 'Belum ada vendor yang di-assign'
+                  : 'No vendors found'}
               </h3>
               <p className="text-muted-foreground mb-4">
-                Mulai assign vendor untuk event ini
+                {vendors.length === 0
+                  ? 'Mulai assign vendor untuk event ini'
+                  : 'Try adjusting your search or filters'}
               </p>
-              <Button onClick={() => setAssignVendorOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Assign Vendor Pertama
-              </Button>
+              {vendors.length === 0 && (
+                <Button onClick={() => setAssignVendorOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Assign Vendor Pertama
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {vendors.map((vendorAssignment) => (
-            <Card key={vendorAssignment.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {vendorAssignment.vendor.name}
-                      {vendorAssignment.status === 'confirmed' && (
-                        <Badge variant="default" className="text-xs">
-                          Confirmed
-                        </Badge>
-                      )}
-                      {vendorAssignment.status === 'pending' && (
-                        <Badge variant="secondary" className="text-xs">
-                          Pending
-                        </Badge>
-                      )}
-                    </CardTitle>
-                    <CardDescription>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vendor Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Contract Amount</TableHead>
+                <TableHead>Down Payment</TableHead>
+                <TableHead>Payment Status</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredVendors.map((vendorAssignment) => (
+                <TableRow key={vendorAssignment.id}>
+                  <TableCell className="font-medium">
+                    {vendorAssignment.vendor.name}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
                       {getCategoryLabel(vendorAssignment.vendor.category)}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Contact Info */}
-                {(vendorAssignment.vendor.phone || vendorAssignment.vendor.email) && (
-                  <div className="space-y-2 text-sm">
-                    {vendorAssignment.vendor.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="w-4 h-4" />
-                        <span>{vendorAssignment.vendor.phone}</span>
-                      </div>
-                    )}
-                    {vendorAssignment.vendor.email && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="w-4 h-4" />
-                        <span className="truncate">{vendorAssignment.vendor.email}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Contract Info */}
-                {vendorAssignment.contract_amount && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Nilai Kontrak:</span>
-                      <span className="font-semibold">
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1 text-sm">
+                      {vendorAssignment.vendor.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-3 h-3" />
+                          <span>{vendorAssignment.vendor.phone}</span>
+                        </div>
+                      )}
+                      {vendorAssignment.vendor.email && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="w-3 h-3" />
+                          <span className="truncate max-w-[200px]">{vendorAssignment.vendor.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {vendorAssignment.contract_amount ? (
+                      <span className="font-medium">
                         {vendorAssignment.currency === 'USD' ? '$' : 'Rp '}
                         {vendorAssignment.contract_amount.toLocaleString()}
                       </span>
-                    </div>
-                    {vendorAssignment.down_payment && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Down Payment:</span>
-                        <span className="font-medium">
-                          {vendorAssignment.currency === 'USD' ? '$' : 'Rp '}
-                          {vendorAssignment.down_payment.toLocaleString()}
-                        </span>
-                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
-                  </div>
-                )}
-
-                {/* Payment Status */}
-                <div className="flex items-center justify-between pt-3 border-t">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-muted-foreground" />
+                  </TableCell>
+                  <TableCell>
+                    {vendorAssignment.down_payment ? (
+                      <span className="font-medium">
+                        {vendorAssignment.currency === 'USD' ? '$' : 'Rp '}
+                        {vendorAssignment.down_payment.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Badge
                       variant={
                         vendorAssignment.payment_status === 'paid'
@@ -229,42 +305,55 @@ export default function EventVendorsPage() {
                           ? 'secondary'
                           : 'outline'
                       }
+                      className={
+                        vendorAssignment.payment_status === 'paid'
+                          ? 'bg-green-600'
+                          : ''
+                      }
                     >
                       {PAYMENT_STATUS_LABELS[vendorAssignment.payment_status]}
                     </Badge>
-                  </div>
-
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEditVendor(vendorAssignment)}
-                      title="Edit assignment"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveVendor(vendorAssignment)}
-                      title="Hapus vendor"
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                {vendorAssignment.notes && (
-                  <div className="text-sm text-muted-foreground border-t pt-3">
-                    <p className="font-medium mb-1">Catatan:</p>
-                    <p className="text-xs">{vendorAssignment.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  </TableCell>
+                  <TableCell>
+                    {vendorAssignment.status === 'confirmed' ? (
+                      <Badge variant="default">Confirmed</Badge>
+                    ) : (
+                      <Badge variant="secondary">Pending</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {vendorAssignment.notes ? (
+                      <span className="text-sm text-muted-foreground truncate max-w-[150px] block" title={vendorAssignment.notes}>
+                        {vendorAssignment.notes}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditVendor(vendorAssignment)}
+                        title="Edit assignment"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveVendor(vendorAssignment)}
+                        title="Hapus vendor"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -291,6 +380,6 @@ export default function EventVendorsPage() {
         onSuccess={loadVendors}
         vendorAssignment={selectedVendor}
       />
-    </div>
+    </PageLayout>
   )
 }

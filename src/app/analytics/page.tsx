@@ -188,7 +188,7 @@ export default function AnalyticsPage() {
             Comprehensive insights across all your events
           </p>
         </div>
-        <Button onClick={handleExportCsv} disabled={exporting} variant="outline">
+        <Button onClick={handleExportCsv} disabled={exporting} variant="outline" className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
           {exporting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

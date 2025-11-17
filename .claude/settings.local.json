@@ -6,7 +6,10 @@
       "Bash(powershell -Command:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(del \"d:\\Claude\\wedding-guest-app\\src\\types\\dhtmlx-gantt.d.ts\")"
     ],
     "deny": [],
     "ask": []

@@ -233,6 +233,7 @@ export default function ProfileSettingsPage() {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
+                  className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Change Photo
@@ -384,6 +385,7 @@ export default function ProfileSettingsPage() {
               <Button
                 type="button"
                 variant="outline"
+                className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
                 onClick={() => {
                   setFormData({
                     name: user?.user_metadata?.name || '',

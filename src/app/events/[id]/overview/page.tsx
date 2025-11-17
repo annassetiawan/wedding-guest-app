@@ -25,6 +25,10 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+
 export default function EventOverviewPage() {
   const params = useParams()
   const router = useRouter()
@@ -92,40 +96,43 @@ export default function EventOverviewPage() {
   const isUpcoming = eventDate >= new Date()
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{event.event_name}</h1>
-          <p className="text-lg text-muted-foreground">
-            {event.bride_name} & {event.groom_name}
-          </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {format(eventDate, 'd MMMM yyyy, EEEE', { locale: idLocale })}
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {event.venue}
+    <PageLayout>
+      <PageHeader
+        title={event.event_name}
+        subtitle={
+          <div className="space-y-2">
+            <p className="text-lg text-muted-foreground">
+              {event.bride_name} & {event.groom_name}
+            </p>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {format(eventDate, 'd MMMM yyyy, EEEE', { locale: idLocale })}
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                {event.venue}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/events/${eventId}/edit`}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Event
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href={`/events/${eventId}/checkin`}>
-              <QrCode className="h-4 w-4 mr-2" />
-              Check-in
-            </Link>
-          </Button>
-        </div>
-      </div>
+        }
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`/events/${eventId}/edit`}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Event
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href={`/events/${eventId}/checkin`}>
+                <QrCode className="h-4 w-4 mr-2" />
+                Check-in
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
       {/* Status Badge */}
       <div>
@@ -186,7 +193,11 @@ export default function EventOverviewPage() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/guests`}>
               <div className="flex items-start gap-3 w-full">
                 <Users className="h-5 w-5 mt-0.5" />
@@ -200,7 +211,11 @@ export default function EventOverviewPage() {
             </Link>
           </Button>
 
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/vendors`}>
               <div className="flex items-start gap-3 w-full">
                 <Briefcase className="h-5 w-5 mt-0.5" />
@@ -214,7 +229,11 @@ export default function EventOverviewPage() {
             </Link>
           </Button>
 
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/timeline`}>
               <div className="flex items-start gap-3 w-full">
                 <Clock className="h-5 w-5 mt-0.5" />
@@ -228,7 +247,11 @@ export default function EventOverviewPage() {
             </Link>
           </Button>
 
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/analytics`}>
               <div className="flex items-start gap-3 w-full">
                 <TrendingUp className="h-5 w-5 mt-0.5" />
@@ -242,7 +265,11 @@ export default function EventOverviewPage() {
             </Link>
           </Button>
 
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/checkin`}>
               <div className="flex items-start gap-3 w-full">
                 <QrCode className="h-5 w-5 mt-0.5" />
@@ -256,7 +283,11 @@ export default function EventOverviewPage() {
             </Link>
           </Button>
 
-          <Button variant="outline" className="justify-start h-auto py-4" asChild>
+          <Button
+            variant="outline"
+            className="justify-start h-auto py-4 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
+            asChild
+          >
             <Link href={`/events/${eventId}/settings`}>
               <div className="flex items-start gap-3 w-full">
                 <Edit className="h-5 w-5 mt-0.5" />
@@ -298,7 +329,7 @@ export default function EventOverviewPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   )
 }
 

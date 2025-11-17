@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useMemo } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import type { EventTimelineWithVendor } from '@/types/timeline.types'
 import {
@@ -12,6 +11,7 @@ import {
   Circle,
   User,
   Phone,
+  MoreVertical,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { GanttWrapper } from './GanttWrapper'
 
 interface TimelineGanttChartProps {
   timeline: EventTimelineWithVendor[]
@@ -35,19 +36,8 @@ interface TimelineGanttChartProps {
 }
 
 /**
- * Calculate time slot position for Gantt chart
+ * TimelineGanttChart - Display timeline items using Frappe Gantt Chart
  */
-function timeToMinutes(timeStr: string): number {
-  const [hours, minutes] = timeStr.split(':').map(Number)
-  return hours * 60 + minutes
-}
-
-function minutesToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
-}
-
 export function TimelineGanttChart({
   timeline,
   liveMode,
@@ -56,57 +46,12 @@ export function TimelineGanttChart({
   onDelete,
   onToggleComplete,
 }: TimelineGanttChartProps) {
-  // Calculate time range for Gantt chart
-  const { startTime, endTime, totalMinutes } = useMemo(() => {
-    if (timeline.length === 0) {
-      return { startTime: 0, endTime: 24 * 60, totalMinutes: 24 * 60 }
+  // Handle task click from Gantt chart
+  const handleTaskClick = (taskId: string) => {
+    const item = timeline.find((t) => t.id === taskId)
+    if (item) {
+      onEdit(item)
     }
-
-    const times = timeline.map((item) => {
-      const start = timeToMinutes(item.start_time)
-      const end = start + item.duration_minutes
-      return { start, end }
-    })
-
-    const minStart = Math.min(...times.map((t) => t.start))
-    const maxEnd = Math.max(...times.map((t) => t.end))
-
-    // Add padding
-    const paddedStart = Math.max(0, minStart - 60) // 1 hour padding before
-    const paddedEnd = Math.min(24 * 60, maxEnd + 60) // 1 hour padding after
-
-    return {
-      startTime: paddedStart,
-      endTime: paddedEnd,
-      totalMinutes: paddedEnd - paddedStart,
-    }
-  }, [timeline])
-
-  // Generate time markers (every hour)
-  const timeMarkers = useMemo(() => {
-    const markers: { time: string; position: number }[] = []
-    const startHour = Math.floor(startTime / 60)
-    const endHour = Math.ceil(endTime / 60)
-
-    for (let hour = startHour; hour <= endHour; hour++) {
-      const minutes = hour * 60
-      const position = ((minutes - startTime) / totalMinutes) * 100
-      markers.push({
-        time: minutesToTime(minutes),
-        position,
-      })
-    }
-
-    return markers
-  }, [startTime, endTime, totalMinutes])
-
-  // Calculate position for each timeline item
-  const getItemPosition = (item: EventTimelineWithVendor) => {
-    const itemStart = timeToMinutes(item.start_time)
-    const left = ((itemStart - startTime) / totalMinutes) * 100
-    const width = (item.duration_minutes / totalMinutes) * 100
-
-    return { left, width }
   }
 
   // Show empty state if no timeline items
@@ -123,145 +68,151 @@ export function TimelineGanttChart({
 
   return (
     <div className="space-y-4">
-      {/* Time axis */}
-      <div className="relative h-8 border-b">
-        {timeMarkers.map((marker, index) => (
-          <div
-            key={index}
-            className="absolute top-0 flex flex-col items-center"
-            style={{ left: `${marker.position}%` }}
-          >
-            <div className="h-2 w-px bg-border" />
-            <span className="text-xs text-muted-foreground mt-1">
-              {marker.time}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Gantt Chart - Using GanttWrapper with dynamic import */}
+      <GanttWrapper timeline={timeline} onTaskClick={handleTaskClick} />
 
-      {/* Gantt chart bars */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="gantt-timeline">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-2 min-h-[200px] relative"
-            >
-              {timeline.map((item, index) => {
-                const { left, width } = getItemPosition(item)
-
-                return (
+      {/* Timeline Items List with Drag & Drop */}
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Timeline Items</h4>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="gantt-timeline-list">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-2"
+              >
+                {timeline.map((item, index) => (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
                     {(provided, snapshot) => (
-                      <div
+                      <Card
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         className={cn(
-                          'relative h-20 mb-1',
-                          snapshot.isDragging && 'opacity-50'
+                          'transition-all',
+                          item.is_completed && 'opacity-60',
+                          liveMode && item.is_completed && 'bg-green-50 dark:bg-green-950/20',
+                          snapshot.isDragging && 'shadow-lg ring-2 ring-primary'
                         )}
                       >
-                        {/* Gantt bar */}
-                        <Card
-                          className={cn(
-                            'absolute h-full transition-all cursor-pointer hover:shadow-lg',
-                            item.is_completed && 'opacity-60'
-                          )}
-                          style={{
-                            left: `${left}%`,
-                            width: `${width}%`,
-                            minWidth: '80px',
-                            backgroundColor: item.color + '20',
-                            borderColor: item.color,
-                          }}
-                        >
-                          <CardContent className="p-3 h-full flex items-center gap-2">
-                            {/* Drag handle */}
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            {/* Drag Handle */}
                             <div
                               {...provided.dragHandleProps}
                               className="cursor-move text-muted-foreground hover:text-foreground"
                             >
-                              <GripVertical className="w-4 h-4" />
+                              <GripVertical className="w-5 h-5" />
                             </div>
 
-                            {/* Completion checkbox */}
+                            {/* Completion Checkbox */}
                             {liveMode && (
                               <button
                                 onClick={() => onToggleComplete(item)}
                                 className="flex-shrink-0"
                               >
                                 {item.is_completed ? (
-                                  <CheckCircle className="w-5 h-5 text-green-600" />
+                                  <CheckCircle className="w-6 h-6 text-green-600" />
                                 ) : (
-                                  <Circle className="w-5 h-5 text-muted-foreground hover:text-primary" />
+                                  <Circle className="w-6 h-6 text-muted-foreground hover:text-primary" />
                                 )}
                               </button>
                             )}
 
-                            {/* Item content */}
+                            {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
-                                <span className="font-medium text-sm truncate">
-                                  {item.title}
-                                </span>
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex-1">
+                                  <h4
+                                    className={cn(
+                                      'font-medium text-sm',
+                                      item.is_completed && 'line-through text-muted-foreground'
+                                    )}
+                                  >
+                                    {item.title}
+                                  </h4>
+                                  {item.description && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  {/* Time */}
+                                  <div className="text-right">
+                                    <div className="text-sm font-medium">
+                                      {item.start_time.substring(0, 5)}
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      {item.duration_minutes}m
+                                    </Badge>
+                                  </div>
+
+                                  {/* Actions */}
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                      >
+                                        <MoreVertical className="w-4 h-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => onEdit(item)}>
+                                        <Edit className="w-4 h-4 mr-2" />
+                                        Edit
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => onDelete(item)}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                <span>{item.start_time}</span>
-                                <span>•</span>
-                                <span>{item.duration_minutes} min</span>
-                                {item.pic_name && (
-                                  <>
-                                    <span>•</span>
+
+                              {/* PIC Info */}
+                              {(item.pic_name || item.vendor) && (
+                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                  {item.pic_name && (
                                     <div className="flex items-center gap-1">
                                       <User className="w-3 h-3" />
-                                      <span className="truncate">{item.pic_name}</span>
+                                      <span>{item.pic_name}</span>
                                     </div>
-                                  </>
-                                )}
-                              </div>
+                                  )}
+                                  {item.pic_phone && (
+                                    <div className="flex items-center gap-1">
+                                      <Phone className="w-3 h-3" />
+                                      <span>{item.pic_phone}</span>
+                                    </div>
+                                  )}
+                                  {item.vendor && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {item.vendor.name}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
                             </div>
-
-                            {/* Actions menu */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 flex-shrink-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <GripVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => onEdit(item)}>
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(item)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </CardContent>
-                        </Card>
-                      </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     )}
                   </Draggable>
-                )
-              })}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </div>
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground pt-4 border-t">
@@ -269,10 +220,14 @@ export function TimelineGanttChart({
           <GripVertical className="w-3 h-3" />
           <span>Drag to reorder</span>
         </div>
+        <div className="flex items-center gap-2">
+          <Clock className="w-3 h-3" />
+          <span>Click on Gantt bar to edit</span>
+        </div>
         {liveMode && (
           <div className="flex items-center gap-2">
             <CheckCircle className="w-3 h-3 text-green-600" />
-            <span>Click to mark complete</span>
+            <span>Click checkbox to mark complete</span>
           </div>
         )}
       </div>

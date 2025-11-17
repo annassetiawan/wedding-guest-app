@@ -11,6 +11,10 @@ import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import EventAnalytics from '@/components/events/EventAnalytics'
 
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+
 export default function EventAnalyticsPage() {
   const params = useParams()
   const router = useRouter()
@@ -67,17 +71,14 @@ export default function EventAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">
-          View statistics and insights for {event.event_name}
-        </p>
-      </div>
+    <PageLayout>
+      <PageHeader
+        title="Analytics"
+        subtitle={`View statistics and insights for ${event.event_name}`}
+      />
 
       {/* Analytics Component */}
       <EventAnalytics guests={guests} />
-    </div>
+    </PageLayout>
   )
 }

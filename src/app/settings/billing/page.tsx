@@ -76,7 +76,7 @@ export default function BillingSettingsPage() {
             <Button disabled>
               Upgrade Plan
             </Button>
-            <Button variant="outline" disabled>
+            <Button variant="outline" disabled className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
               View Plans
             </Button>
           </div>

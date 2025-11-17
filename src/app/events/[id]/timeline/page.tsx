@@ -9,6 +9,10 @@ import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EventTimelineWrapper } from '@/components/events/EventTimelineWrapper'
 
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+
 export default function EventTimelinePage() {
   const params = useParams()
   const router = useRouter()
@@ -59,14 +63,11 @@ export default function EventTimelinePage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Event Timeline</h1>
-        <p className="text-muted-foreground">
-          Manage rundown and timeline for {event.event_name}
-        </p>
-      </div>
+    <PageLayout>
+      <PageHeader
+        title="Event Timeline"
+        subtitle={`Manage rundown and timeline for ${event.event_name}`}
+      />
 
       {/* Timeline Component */}
       <EventTimelineWrapper
@@ -74,6 +75,6 @@ export default function EventTimelinePage() {
         eventDate={event.event_date}
         userId={user.id}
       />
-    </div>
+    </PageLayout>
   )
 }

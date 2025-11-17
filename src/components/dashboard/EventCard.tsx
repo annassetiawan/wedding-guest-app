@@ -68,26 +68,26 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
   return (
     <Card className={cn(
       "group relative overflow-hidden transition-all duration-300",
-      "hover:shadow-md border-border"
+      "hover:shadow-md border-border !py-4"
     )}>
       {/* Icon Badge */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-          <Calendar className="w-5 h-5 text-foreground" />
+      <div className="absolute top-3 right-3 z-10">
+        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+          <Calendar className="w-4 h-4 text-foreground" />
         </div>
       </div>
 
       <div onClick={handleCardClick} className="cursor-pointer">
-        <CardHeader className="pb-3 !pr-16">
-          <div className="min-w-0 max-w-[calc(100%-3.5rem)]">
+        <CardHeader className="!pb-3 !pt-0 !pr-14">
+          <div className="min-w-0 max-w-[calc(100%-3rem)]">
             <h3
-              className="text-xl font-bold text-foreground truncate group-hover:text-primary transition-colors mb-2"
+              className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors mb-1"
               title={event.event_name}
             >
               {event.event_name}
             </h3>
             <p
-              className="text-sm text-muted-foreground truncate"
+              className="text-xs text-muted-foreground truncate"
               title={`${event.bride_name} & ${event.groom_name}`}
             >
               {event.bride_name} & {event.groom_name}
@@ -95,7 +95,7 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 pb-4">
+        <CardContent className="space-y-3 !pb-3">
           {/* Status Badge */}
           <div className="flex items-center gap-2">
             <Badge variant={statusInfo.variant} className="font-medium">
@@ -110,79 +110,79 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
           </div>
 
           {/* Date */}
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">{format(eventDate, 'd MMMM yyyy, EEEE', { locale: idLocale })}</span>
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+            <span className="truncate">{format(eventDate, 'd MMM yyyy', { locale: idLocale })}</span>
           </div>
 
           {/* Venue */}
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+          <div className="flex items-center text-xs text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
             <span className="truncate" title={event.venue}>{event.venue}</span>
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-              <Users className="h-4 w-4 text-primary" />
-              <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">Total Tamu</span>
-                <span className="text-sm font-bold">{event.guest_count}</span>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-muted/50">
+              <Users className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] text-muted-foreground">Total Tamu</span>
+                <span className="text-xs font-bold">{event.guest_count}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-              <UserCheck className="h-4 w-4 text-primary" />
-              <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">Check-in</span>
-                <span className="text-sm font-bold text-primary">{event.checked_in_count}</span>
+            <div className="flex items-center gap-1.5 p-2 rounded-lg bg-muted/50">
+              <UserCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] text-muted-foreground">Check-in</span>
+                <span className="text-xs font-bold text-primary">{event.checked_in_count}</span>
               </div>
             </div>
           </div>
 
           {/* Check-in Progress */}
-          <div className="space-y-2 pt-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">Check-in Progress</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Progress</span>
               <span className="font-bold text-foreground">
                 {checkinPercentage}%
               </span>
             </div>
-            <Progress value={checkinPercentage} className="h-2" />
+            <Progress value={checkinPercentage} className="h-1.5" />
           </div>
         </CardContent>
       </div>
 
-      <CardFooter className="bg-muted/30 border-t pt-4 pb-4 gap-2">
-        <Button onClick={handleCardClick} className="flex-1">
+      <CardFooter className="bg-muted/30 border-t !pt-3 !pb-3 gap-2">
+        <Button onClick={handleCardClick} className="flex-1 h-8 text-xs">
           Lihat Detail
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <MoreVertical className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
+              <MoreVertical className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild className="cursor-pointer">
+            <DropdownMenuItem asChild className="cursor-pointer text-xs">
               <Link href={`/events/${event.id}/checkin`}>
-                <QrCode className="mr-2 h-4 w-4" />
+                <QrCode className="mr-2 h-3.5 w-3.5" />
                 <span>Start Check-in</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onEdit?.(event.id)}
-              className="cursor-pointer"
+              className="cursor-pointer text-xs"
             >
-              <Edit className="mr-2 h-4 w-4" />
+              <Edit className="mr-2 h-3.5 w-3.5" />
               <span>Edit</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onDelete?.(event.id)}
-              className="cursor-pointer text-red-600"
+              className="cursor-pointer text-red-600 text-xs"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
               <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

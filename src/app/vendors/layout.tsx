@@ -24,7 +24,7 @@ export default function VendorsLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          {children}
+          <div className="container mx-auto max-w-7xl p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </div>

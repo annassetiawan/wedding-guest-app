@@ -155,7 +155,7 @@ export function TemplatePreviewModal({
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
                     onClick={() => onOpenChange(false)}
                   >
                     Close

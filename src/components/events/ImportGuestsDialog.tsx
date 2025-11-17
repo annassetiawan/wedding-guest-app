@@ -246,7 +246,7 @@ Ahmad Family,08177778888,Family`
                 </p>
               </div>
             </div>
-            <Button variant="outline" onClick={handleDownloadTemplate}>
+            <Button variant="outline" onClick={handleDownloadTemplate} className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
               <Download className="mr-2 h-4 w-4" />
               Download Template
             </Button>
@@ -410,7 +410,7 @@ Ahmad Family,08177778888,Family`
 
         <DialogFooter className="gap-2 sm:gap-0">
           {parsedGuests.length > 0 && !importing && (
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset} className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
               <X className="mr-2 h-4 w-4" />
               Reset
             </Button>
@@ -419,6 +419,7 @@ Ahmad Family,08177778888,Family`
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={importing}
+            className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all"
           >
             Batal
           </Button>

@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* React Big Calendar CSS */
+@import "react-big-calendar/lib/css/react-big-calendar.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

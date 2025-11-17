@@ -256,7 +256,7 @@ export default function GuestQRDialog({
               <div className="flex flex-col items-center gap-4">
                 <X className="h-12 w-12 text-red-500" />
                 <p className="text-sm text-muted-foreground">Gagal memuat QR code</p>
-                <Button onClick={generateQR} variant="outline" size="sm">
+                <Button onClick={generateQR} variant="outline" size="sm" className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
                   Coba Lagi
                 </Button>
               </div>
@@ -265,7 +265,7 @@ export default function GuestQRDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={handlePrint} disabled={!qrDataUrl || loading}>
+          <Button variant="outline" onClick={handlePrint} disabled={!qrDataUrl || loading} className="hover:bg-accent hover:border-accent-foreground/20 dark:hover:bg-accent dark:hover:border-accent-foreground/30 transition-all">
             <QrCodeIcon className="mr-2 h-4 w-4" />
             Print
           </Button>

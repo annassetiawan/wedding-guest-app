@@ -29,6 +29,7 @@ import {
   Loader2,
   Edit,
   Trash2,
+  Briefcase,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,9 +49,22 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { toast } from 'sonner'
 import { VendorFormDialog } from '@/components/vendors/VendorFormDialog'
 import { DeleteVendorDialog } from '@/components/vendors/DeleteVendorDialog'
+
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { SearchFilterBar, FilterOption } from '@/components/layout/SearchFilterBar'
 
 export default function VendorsPage() {
   const { user } = useAuth()
@@ -118,193 +132,255 @@ export default function VendorsPage() {
     return <VendorsPageSkeleton />
   }
 
+  const filterOptions: FilterOption[] = [
+    {
+      key: 'category',
+      label: 'Category',
+      options: [
+        { value: 'all', label: 'Semua Kategori' },
+        ...Object.entries(VENDOR_CATEGORY_LABELS).map(([key, label]) => ({
+          value: key,
+          label,
+        })),
+      ],
+      defaultValue: filters.category || 'all',
+    },
+    {
+      key: 'price_range',
+      label: 'Price Range',
+      options: [
+        { value: 'all', label: 'Semua Harga' },
+        ...Object.entries(PRICE_RANGE_LABELS).map(([key, label]) => ({
+          value: key,
+          label,
+        })),
+      ],
+      defaultValue: filters.price_range || 'all',
+    },
+  ]
+
+  const handleFilterChangeWrapper = (key: string, value: string) => {
+    handleFilterChange(key as keyof VendorFilters, value)
+  }
+
   return (
-    <div className="h-full bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Vendor Management</h1>
-              <p className="text-muted-foreground mt-1">
-                Kelola database vendor Anda
-              </p>
+    <PageLayout>
+      <PageHeader
+        title="Vendor Management"
+        subtitle="Kelola database vendor Anda"
+        action={
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Tambah Vendor
+          </Button>
+        }
+      />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
             </div>
-            <Button onClick={() => setAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Vendor
-            </Button>
-          </div>
-        </div>
-      </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Vendor</p>
+              <div className="text-3xl font-bold tracking-tight">{vendors.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Database vendor aktif</p>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Vendor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{vendors.length}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Database vendor aktif
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Rating Rata-rata
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold flex items-center gap-2">
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Rating Rata-rata</p>
+              <div className="text-3xl font-bold tracking-tight">
                 {vendors.length > 0
                   ? (
                       vendors.reduce((sum, v) => sum + (v.rating || 0), 0) /
                       vendors.length
                     ).toFixed(1)
                   : '0.0'}
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dari {vendors.length} vendor
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Event
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {vendors.reduce((sum, v) => sum + v.total_events, 0)}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Event yang ditangani
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Vendor Aktif
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {vendors.filter((v) => v.is_active).length}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Siap untuk event
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Search */}
-              <div className="md:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari vendor..."
-                    value={filters.search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <Select
-                value={filters.category || 'all'}
-                onValueChange={(value) => handleFilterChange('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua Kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Kategori</SelectItem>
-                  {Object.entries(VENDOR_CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Price Range Filter */}
-              <Select
-                value={filters.price_range || 'all'}
-                onValueChange={(value) =>
-                  handleFilterChange('price_range', value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua Harga" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Harga</SelectItem>
-                  {Object.entries(PRICE_RANGE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Dari {vendors.length} vendor</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Vendors Grid */}
-        {vendors.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">
-                Belum ada vendor
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Mulai tambahkan vendor untuk memudahkan koordinasi event Anda
-              </p>
-              <Button onClick={() => setAddDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Tambah Vendor Pertama
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vendors.map((vendor) => (
-              <VendorCard
-                key={vendor.id}
-                vendor={vendor}
-                onEdit={(v) => {
-                  setSelectedVendor(v)
-                  setEditDialogOpen(true)
-                }}
-                onDelete={(v) => {
-                  setSelectedVendor(v)
-                  setDeleteDialogOpen(true)
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Event</p>
+              <div className="text-3xl font-bold tracking-tight">
+                {vendors.reduce((sum, v) => sum + v.total_events, 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Event yang ditangani</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <Briefcase className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Vendor Aktif</p>
+              <div className="text-3xl font-bold tracking-tight text-green-600">
+                {vendors.filter((v) => v.is_active).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Siap untuk event</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      <SearchFilterBar
+        searchable
+        searchPlaceholder="Cari vendor..."
+        searchValue={filters.search}
+        onSearchChange={handleSearch}
+        filters={filterOptions}
+        onFilterChange={handleFilterChangeWrapper}
+      />
+
+      {/* Vendors Table */}
+      {vendors.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">
+              Belum ada vendor
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Mulai tambahkan vendor untuk memudahkan koordinasi event Anda
+            </p>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Vendor Pertama
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vendor Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Price Range</TableHead>
+                <TableHead>Rating</TableHead>
+                <TableHead>Active Events</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {vendors.map((vendor) => (
+                <TableRow key={vendor.id}>
+                  <TableCell className="font-medium">{vendor.name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {getCategoryLabel(vendor.category)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1 text-sm">
+                      {vendor.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-3 h-3" />
+                          <span>{vendor.phone}</span>
+                        </div>
+                      )}
+                      {vendor.email && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="w-3 h-3" />
+                          <span className="truncate max-w-[200px]">{vendor.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {vendor.price_range ? (
+                      <Badge variant="secondary">
+                        {getPriceRangeLabel(vendor.price_range)}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {vendor.rating ? (
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-medium">{vendor.rating.toFixed(1)}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <span className="font-medium">{vendor.active_events}</span>
+                      <span className="text-muted-foreground"> / {vendor.total_events}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {vendor.is_active ? (
+                      <Badge variant="default" className="bg-green-600">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">Inactive</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedVendor(vendor)
+                          setEditDialogOpen(true)
+                        }}
+                        title="Edit vendor"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedVendor(vendor)
+                          setDeleteDialogOpen(true)
+                        }}
+                        title="Hapus vendor"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Dialogs */}
       <VendorFormDialog
@@ -328,100 +404,7 @@ export default function VendorsPage() {
         onSuccess={loadVendors}
         vendor={selectedVendor}
       />
-    </div>
-  )
-}
-
-// ============================================
-// Vendor Card Component
-// ============================================
-
-function VendorCard({
-  vendor,
-  onEdit,
-  onDelete,
-}: {
-  vendor: VendorWithStats
-  onEdit: (vendor: VendorWithStats) => void
-  onDelete: (vendor: VendorWithStats) => void
-}) {
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg">{vendor.name}</CardTitle>
-            <CardDescription className="mt-1">
-              {getCategoryLabel(vendor.category)}
-            </CardDescription>
-          </div>
-          {!vendor.is_active && (
-            <Badge variant="secondary">Nonaktif</Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Rating */}
-        {vendor.rating && (
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{vendor.rating.toFixed(1)}</span>
-            <span className="text-sm text-muted-foreground">
-              ({vendor.total_events} event)
-            </span>
-          </div>
-        )}
-
-        {/* Price Range */}
-        {vendor.price_range && (
-          <Badge variant="outline">
-            {getPriceRangeLabel(vendor.price_range)}
-          </Badge>
-        )}
-
-        {/* Contact Info */}
-        <div className="space-y-2 text-sm">
-          {vendor.phone && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="w-4 h-4" />
-              <span>{vendor.phone}</span>
-            </div>
-          )}
-          {vendor.email && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Mail className="w-4 h-4" />
-              <span className="truncate">{vendor.email}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="text-sm">
-            <span className="font-medium">{vendor.active_events}</span>
-            <span className="text-muted-foreground"> event aktif</span>
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(vendor)}
-              title="Edit vendor"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(vendor)}
-              title="Hapus vendor"
-            >
-              <Trash2 className="w-4 h-4 text-red-600" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    </PageLayout>
   )
 }
 

@@ -21,6 +21,9 @@ import {
   Share2,
   ExternalLink,
   Eye,
+  Users,
+  UserCheck,
+  Clock,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -49,6 +52,11 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+
+// Import layout components
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { SearchFilterBar, FilterOption } from '@/components/layout/SearchFilterBar'
 
 // Import guest management dialogs
 import AddGuestDialog from '@/components/events/AddGuestDialog'
@@ -343,158 +351,171 @@ export default function EventGuestsPage() {
     notCheckedIn: guests.filter((g) => !g.checked_in).length,
   }
 
+  const filterOptions: FilterOption[] = [
+    {
+      key: 'category',
+      label: 'Category',
+      options: [
+        { value: 'all', label: 'All Categories' },
+        { value: 'VIP', label: 'VIP' },
+        { value: 'Regular', label: 'Regular' },
+        { value: 'Family', label: 'Family' },
+      ],
+      defaultValue: filterCategory,
+    },
+    {
+      key: 'status',
+      label: 'Kehadiran',
+      options: [
+        { value: 'all', label: 'Semua' },
+        { value: 'checked_in', label: 'Sudah Hadir' },
+        { value: 'not_checked_in', label: 'Belum Hadir' },
+      ],
+      defaultValue: filterCheckedIn,
+    },
+    {
+      key: 'sort',
+      label: 'Sort by',
+      options: [
+        { value: 'name', label: 'Name (A-Z)' },
+        { value: 'checkin_time', label: 'Check-in Time' },
+        { value: 'category', label: 'Category' },
+      ],
+      defaultValue: sortBy,
+    },
+  ]
+
+  const handleFilterChange = (key: string, value: string) => {
+    if (key === 'category') setFilterCategory(value)
+    if (key === 'status') setFilterCheckedIn(value)
+    if (key === 'sort') setSortBy(value as 'name' | 'checkin_time' | 'category')
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Guest List</h1>
-        <p className="text-muted-foreground">
-          Manage guests for {event.event_name}
-        </p>
-      </div>
+    <PageLayout>
+      <PageHeader
+        title="Guest List"
+        subtitle={`Manage guests for ${event.event_name}`}
+        action={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={exportGuestsToCSV}
+              disabled={guests.length === 0}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+            <Button onClick={() => setAddGuestOpen(true)}>
+              <Plus className="w-5 h-5 mr-2" />
+              Add Guest
+            </Button>
+          </div>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Guests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Guests</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.total}</div>
+              <p className="text-xs text-muted-foreground mt-1">Total invited guests</p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Checked In</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.checkedIn}</div>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <UserCheck className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Checked In</p>
+              <div className="text-3xl font-bold tracking-tight text-green-600">{stats.checkedIn}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats.total > 0
+                  ? `${Math.round((stats.checkedIn / stats.total) * 100)}% attendance rate`
+                  : 'No guests yet'}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Not Checked In</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.notCheckedIn}</div>
+        <Card className="relative overflow-hidden transition-all hover:shadow-md border-border">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Not Checked In</p>
+              <div className="text-3xl font-bold tracking-tight">{stats.notCheckedIn}</div>
+              <p className="text-xs text-muted-foreground mt-1">Awaiting check-in</p>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Actions Bar */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name or phone..."
-                className="pl-10"
-              />
-            </div>
-
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="VIP">VIP</SelectItem>
-                <SelectItem value="Regular">Regular</SelectItem>
-                <SelectItem value="Family">Family</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterCheckedIn} onValueChange={setFilterCheckedIn}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Kehadiran" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua</SelectItem>
-                <SelectItem value="checked_in">Sudah Hadir</SelectItem>
-                <SelectItem value="not_checked_in">Belum Hadir</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={sortBy}
-              onValueChange={(value) =>
-                setSortBy(value as 'name' | 'checkin_time' | 'category')
-              }
-            >
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
-                <SelectItem value="checkin_time">Check-in Time</SelectItem>
-                <SelectItem value="category">Category</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={exportGuestsToCSV}
-                disabled={guests.length === 0}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-                <Upload className="w-4 h-4 mr-2" />
-                Import
-              </Button>
-              <Button onClick={() => setAddGuestOpen(true)}>
-                <Plus className="w-5 h-5 mr-2" />
-                Add Guest
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <SearchFilterBar
+        searchable
+        searchPlaceholder="Search by name or phone..."
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filterOptions}
+        onFilterChange={handleFilterChange}
+      />
 
       {/* Guest Table */}
-      <Card>
-        <CardContent className="pt-6">
-          {filteredGuests.length === 0 ? (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium mb-2">
-                {searchQuery || filterCategory !== 'all' || filterCheckedIn !== 'all'
-                  ? 'No guests found'
-                  : 'No guests yet'}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery || filterCategory !== 'all' || filterCheckedIn !== 'all'
-                  ? 'Try adjusting your filters'
-                  : 'Start by adding your first guest'}
-              </p>
-              {!searchQuery && filterCategory === 'all' && filterCheckedIn === 'all' && (
-                <Button onClick={() => setAddGuestOpen(true)}>
-                  <Plus className="w-5 h-5 mr-2" />
-                  Add Your First Guest
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>RSVP</TableHead>
-                    <TableHead>Kehadiran</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+      {filteredGuests.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">
+              {searchQuery || filterCategory !== 'all' || filterCheckedIn !== 'all'
+                ? 'No guests found'
+                : 'No guests yet'}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {searchQuery || filterCategory !== 'all' || filterCheckedIn !== 'all'
+                ? 'Try adjusting your filters'
+                : 'Start by adding your first guest'}
+            </p>
+            {!searchQuery && filterCategory === 'all' && filterCheckedIn === 'all' && (
+              <Button onClick={() => setAddGuestOpen(true)}>
+                <Plus className="w-5 h-5 mr-2" />
+                Add Your First Guest
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>RSVP</TableHead>
+                <TableHead>Kehadiran</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                   {filteredGuests.map((guest) => (
                     <TableRow key={guest.id}>
                       <TableCell>
@@ -621,12 +642,10 @@ export default function EventGuestsPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Dialogs */}
       <AddGuestDialog
@@ -669,6 +688,6 @@ export default function EventGuestsPage() {
         open={guestDetailsOpen}
         onOpenChange={setGuestDetailsOpen}
       />
-    </div>
+    </PageLayout>
   )
 }
