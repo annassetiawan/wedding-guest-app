@@ -1,9 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TimelineGantt } from './TimelineGantt'
+import { CustomTimeline } from './CustomTimeline'
 import type { EventTimelineWithVendor } from '@/types/timeline.types'
-import { Card, CardContent } from '@/components/ui/card'
 
 interface GanttWrapperProps {
   timeline: EventTimelineWithVendor[]
@@ -11,40 +10,95 @@ interface GanttWrapperProps {
 }
 
 /**
- * GanttWrapper - Wrapper component that prepares data for Gantt chart
- * Handles data transformation using gantt-task-react library
+ * GanttWrapper - Wrapper component that prepares data for CustomTimeline
+ * Handles data transformation from EventTimelineWithVendor to CustomTimeline format
  */
 export function GanttWrapper({ timeline, onTaskClick }: GanttWrapperProps) {
-  // Convert timeline items to format required by TimelineGantt component
-  const ganttItems = useMemo(() => {
-    if (!timeline || timeline.length === 0) return []
+  // Transform timeline data to vendors and tasks format
+  const { vendors, tasks } = useMemo(() => {
+    if (!timeline || timeline.length === 0) {
+      return { vendors: [], tasks: [] }
+    }
 
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    const baseDate = `${year}-${month}-${day}`
+    // Extract unique vendors from timeline items
+    const vendorMap = new Map<string, { id: string; name: string; role: string }>()
 
-    return timeline.map((item, index) => {
-      // Parse start time
-      const timeParts = item.start_time.split(':')
-      const hours = String(timeParts[0] || '00').padStart(2, '0')
-      const minutes = String(timeParts[1] || '00').padStart(2, '0')
+    // Add default "No Vendor" entry for items without vendor
+    vendorMap.set('no-vendor', {
+      id: 'no-vendor',
+      name: 'No Vendor Assigned',
+      role: 'Unassigned',
+    })
 
-      // Create start date
-      const startDate = new Date(`${baseDate}T${hours}:${minutes}:00`)
+    timeline.forEach((item) => {
+      if (item.vendor && item.pic_vendor_id) {
+        if (!vendorMap.has(item.pic_vendor_id)) {
+          vendorMap.set(item.pic_vendor_id, {
+            id: item.pic_vendor_id,
+            name: item.vendor.name,
+            role: item.pic_name || 'Contact',
+          })
+        }
+      } else if (item.pic_name) {
+        // Use PIC name as vendor if no vendor relation
+        const picId = `pic-${item.pic_name.toLowerCase().replace(/\s+/g, '-')}`
+        if (!vendorMap.has(picId)) {
+          vendorMap.set(picId, {
+            id: picId,
+            name: item.pic_name,
+            role: 'PIC',
+          })
+        }
+      }
+    })
 
-      // Calculate end date
-      const endDate = new Date(startDate.getTime() + (item.duration_minutes * 60 * 1000))
+    const vendorsList = Array.from(vendorMap.values())
+
+    // Convert timeline items to tasks
+    const tasksList = timeline.map((item) => {
+      // Calculate end time
+      const startTime = item.start_time.substring(0, 5) // HH:MM from HH:MM:SS
+      const [hours, minutes] = startTime.split(':').map(Number)
+      const startMinutes = hours * 60 + minutes
+      const endMinutes = startMinutes + item.duration_minutes
+      const endHours = Math.floor(endMinutes / 60)
+      const endMins = endMinutes % 60
+      const endTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`
+
+      // Determine vendor ID
+      let vendorId = 'no-vendor'
+      if (item.pic_vendor_id) {
+        vendorId = item.pic_vendor_id
+      } else if (item.pic_name) {
+        vendorId = `pic-${item.pic_name.toLowerCase().replace(/\s+/g, '-')}`
+      }
+
+      // Map hex color to Tailwind class
+      const getTailwindColor = (hexColor: string) => {
+        const colorMap: Record<string, string> = {
+          '#3b82f6': 'bg-blue-500',
+          '#10b981': 'bg-green-500',
+          '#f59e0b': 'bg-amber-500',
+          '#ef4444': 'bg-red-500',
+          '#8b5cf6': 'bg-purple-500',
+          '#ec4899': 'bg-pink-500',
+          '#6366f1': 'bg-indigo-500',
+          '#6b7280': 'bg-gray-500',
+        }
+        return colorMap[hexColor] || 'bg-primary'
+      }
 
       return {
         id: item.id,
-        title: item.title || `Task ${index + 1}`,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        progress: item.is_completed ? 100 : 0,
+        vendorId,
+        title: item.title,
+        startTime,
+        endTime,
+        color: getTailwindColor(item.color),
       }
     })
+
+    return { vendors: vendorsList, tasks: tasksList }
   }, [timeline])
 
   if (!timeline || timeline.length === 0) {
@@ -53,12 +107,13 @@ export function GanttWrapper({ timeline, onTaskClick }: GanttWrapperProps) {
 
   return (
     <div>
-      <TimelineGantt items={ganttItems} />
+      <CustomTimeline vendors={vendors} tasks={tasks} />
 
       {/* Task Count */}
-      {ganttItems.length > 0 && (
+      {tasks.length > 0 && (
         <div className="mt-4 text-xs text-muted-foreground">
-          Showing {ganttItems.length} task{ganttItems.length !== 1 ? 's' : ''}
+          Showing {tasks.length} task{tasks.length !== 1 ? 's' : ''} across {vendors.length}{' '}
+          vendor{vendors.length !== 1 ? 's' : ''}
         </div>
       )}
     </div>

@@ -41,16 +41,22 @@ const getPositionStyle = (start: string, end: string, startHour = 7) => {
   };
 };
 
-export function CustomTimeline() {
-  // DUMMY DATA
-  const vendors: Vendor[] = [
+interface CustomTimelineProps {
+  vendors?: Vendor[];
+  tasks?: Task[];
+  className?: string;
+}
+
+export function CustomTimeline({ vendors: propVendors, tasks: propTasks, className }: CustomTimelineProps = {}) {
+  // Default to DUMMY DATA if no props provided
+  const vendors: Vendor[] = propVendors || [
     { id: 'v1', name: 'Lumina Photography', role: 'Photographer' },
     { id: 'v2', name: 'Berkah Catering', role: 'Catering' },
     { id: 'v3', name: 'Melody Band', role: 'Music' },
     { id: 'v4', name: 'Cantika Makeup', role: 'MUA' },
   ];
 
-  const tasks: Task[] = [
+  const tasks: Task[] = propTasks || [
     { id: 't1', vendorId: 'v1', title: 'Foto Akad', startTime: '08:00', endTime: '10:00', color: 'bg-blue-500' },
     { id: 't2', vendorId: 'v1', title: 'Foto Resepsi', startTime: '11:00', endTime: '13:00', color: 'bg-blue-500' },
     { id: 't3', vendorId: 'v2', title: 'Setup Buffet', startTime: '09:30', endTime: '11:00', color: 'bg-orange-500' },
@@ -59,7 +65,7 @@ export function CustomTimeline() {
   ];
 
   return (
-    <div className="w-full rounded-xl border bg-background shadow-sm flex flex-col overflow-hidden">
+    <div className={cn("w-full rounded-xl border bg-background shadow-sm flex flex-col overflow-hidden", className)}>
       {/* Header */}
       <div className="flex border-b bg-muted/40">
         <div className="w-[200px] shrink-0 p-4 font-medium border-r text-sm">
