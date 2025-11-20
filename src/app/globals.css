@@ -195,40 +195,34 @@
   }
 }
 
-/* --- GANTT CHART HARD OVERRIDES --- */
+/* --- FINAL GANTT CHART FIXES --- */
 
-/* 1. Force Wrapper Backgrounds to be Dark */
+/* 1. CONTAINER BACKGROUND (Fixes the "Not Full Width" visual bug) */
+/* Forces the empty space to match the theme background */
 .dark .gantt-container,
 .dark .gantt-vertical-scroll-container,
-.dark .horizontal-scroll {
+.dark .horizontal-scroll,
+.dark .gantt-wrapper {
   background-color: hsl(var(--background)) !important;
   border: none !important;
 }
 
-/* 2. Fix the Zebra Striping (The White Rows in SVG) */
-/* Target the SVG RECT elements specifically */
-.dark rect.grid-row {
+/* 2. GRID ROWS (The White Stripes) */
+/* Target the SVG rect elements specifically */
+.dark .grid-row {
   fill: hsl(var(--background)) !important;
 }
-.dark rect.grid-row:nth-child(even) {
-  fill: hsl(var(--card)) !important; /* Slight contrast for even rows */
+.dark .grid-row:nth-child(even) {
+  fill: hsl(var(--card)) !important; /* Subtle zebra stripe using Card color */
 }
 
-/* 3. Fix Header Backgrounds */
-.dark .calendar-header rect {
-  fill: hsl(var(--muted)) !important;
-}
-.dark .calendar-header text {
-  fill: hsl(var(--muted-foreground)) !important;
-  font-weight: 500 !important;
-}
-
-/* 4. Fix Task List (Left Side) */
+/* 3. TASK LIST (Left Side Text) */
 .dark .task-list-header {
   background-color: hsl(var(--muted)) !important;
-  color: hsl(var(--muted-foreground)) !important;
+  color: hsl(var(--foreground)) !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
+/* Force background to match theme so white text is readable */
 .dark .task-list-item {
   background-color: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
@@ -238,11 +232,16 @@
   background-color: hsl(var(--card)) !important;
 }
 
-/* 5. Fix Lines and Borders */
-.dark .grid-line {
-  stroke: hsl(var(--border)) !important;
-  stroke-width: 1px;
+/* 4. CALENDAR HEADER (Dates at top) */
+.dark .calendar-header rect {
+  fill: hsl(var(--muted)) !important;
 }
+.dark .calendar-header text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+
+/* 5. TICKS & LINES */
+.dark .grid-line,
 .dark .calendar-top-tick,
 .dark .calendar-bottom-tick {
   stroke: hsl(var(--border)) !important;

@@ -4,8 +4,8 @@ import { Gantt, Task, ViewMode } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 // Define interface based on our needs
 interface TimelineGanttProps {
@@ -60,52 +60,63 @@ export function TimelineGantt({ items }: TimelineGanttProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Controls */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Timeline</h3>
-        <div className="flex items-center rounded-md border bg-muted p-1">
-          <Button
-            variant={view === ViewMode.Day ? 'default' : 'ghost'}
-            size="sm"
+      {/* Header Controls */}
+      <div className="flex items-center justify-between p-1">
+        <h3 className="font-medium">Timeline</h3>
+        <div className="flex rounded-md border bg-muted p-1 shadow-sm">
+          {/* View Mode Switcher Buttons */}
+          <button
             onClick={() => setView(ViewMode.Day)}
-            className="h-7 px-3 text-xs"
+            className={cn(
+              'px-3 py-1 text-xs rounded-sm',
+              view === ViewMode.Day && 'bg-background shadow-sm'
+            )}
           >
             Day
-          </Button>
-          <Button
-            variant={view === ViewMode.Week ? 'default' : 'ghost'}
-            size="sm"
+          </button>
+          <button
             onClick={() => setView(ViewMode.Week)}
-            className="h-7 px-3 text-xs"
+            className={cn(
+              'px-3 py-1 text-xs rounded-sm',
+              view === ViewMode.Week && 'bg-background shadow-sm'
+            )}
           >
             Week
-          </Button>
-          <Button
-            variant={view === ViewMode.Month ? 'default' : 'ghost'}
-            size="sm"
+          </button>
+          <button
             onClick={() => setView(ViewMode.Month)}
-            className="h-7 px-3 text-xs"
+            className={cn(
+              'px-3 py-1 text-xs rounded-sm',
+              view === ViewMode.Month && 'bg-background shadow-sm'
+            )}
           >
             Month
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* CHART WRAPPER - This fixes the 'cut off' look */}
-      <div className="w-full overflow-hidden rounded-xl border bg-background shadow-sm">
-        {/* Force a dark background on this specific div to blend with the chart */}
-        <div className="h-[500px] w-full overflow-auto bg-background dark:bg-background">
+      {/* CHART CONTAINER */}
+      {/* relative group ensures styling isolation */}
+      <div className="relative w-full overflow-hidden rounded-xl border bg-background shadow-sm">
+        {/* IMPORTANT: This wrapper div forces the background color even if the chart is narrow */}
+        <div
+          className="h-[500px] w-full overflow-hidden"
+          style={{
+            backgroundColor: isDark ? 'hsl(var(--background))' : '#ffffff',
+          }}
+        >
           <Gantt
             tasks={tasks}
             viewMode={view}
-            listCellWidth="160px"
+            locale="ID"
+            listCellWidth={isDark ? '160px' : '160px'}
             columnWidth={65}
-            headerHeight={60}
+            barFill={70}
+            // Force colors via props as secondary fallback
             barBackgroundColor={isDark ? '#334155' : '#e2e8f0'}
             barBackgroundSelectedColor={isDark ? '#475569' : '#cbd5e1'}
-            arrowColor={isDark ? '#94a3b8' : '#64748b'}
-            fontColor={isDark ? '#f8fafc' : '#1e293b'}
-            todayColor={isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'}
+            // Use transparent here so our CSS overrides take full effect
+            todayColor="rgba(0,0,0,0)"
           />
         </div>
       </div>
