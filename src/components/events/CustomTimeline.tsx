@@ -48,21 +48,35 @@ interface CustomTimelineProps {
 }
 
 export function CustomTimeline({ vendors: propVendors, tasks: propTasks, className }: CustomTimelineProps = {}) {
-  // Default to DUMMY DATA if no props provided
-  const vendors: Vendor[] = propVendors || [
-    { id: 'v1', name: 'Lumina Photography', role: 'Photographer' },
-    { id: 'v2', name: 'Berkah Catering', role: 'Catering' },
-    { id: 'v3', name: 'Melody Band', role: 'Music' },
-    { id: 'v4', name: 'Cantika Makeup', role: 'MUA' },
-  ];
+  // PRIORITY: Use database data from props if provided (via GanttWrapper)
+  // FALLBACK: Use dummy data only for standalone testing/preview
+  const vendors: Vendor[] = propVendors && propVendors.length > 0
+    ? propVendors
+    : [
+        { id: 'v1', name: 'Lumina Photography', role: 'Photographer' },
+        { id: 'v2', name: 'Berkah Catering', role: 'Catering' },
+        { id: 'v3', name: 'Melody Band', role: 'Music' },
+        { id: 'v4', name: 'Cantika Makeup', role: 'MUA' },
+      ];
 
-  const tasks: Task[] = propTasks || [
-    { id: 't1', vendorId: 'v1', title: 'Foto Akad', startTime: '08:00', endTime: '10:00', color: 'bg-blue-500' },
-    { id: 't2', vendorId: 'v1', title: 'Foto Resepsi', startTime: '11:00', endTime: '13:00', color: 'bg-blue-500' },
-    { id: 't3', vendorId: 'v2', title: 'Setup Buffet', startTime: '09:30', endTime: '11:00', color: 'bg-orange-500' },
-    { id: 't4', vendorId: 'v3', title: 'Check Sound', startTime: '09:00', endTime: '10:00', color: 'bg-purple-500' },
-    { id: 't5', vendorId: 'v4', title: 'Makeup CPW', startTime: '07:00', endTime: '09:00', color: 'bg-pink-500' },
-  ];
+  const tasks: Task[] = propTasks && propTasks.length > 0
+    ? propTasks
+    : [
+        { id: 't1', vendorId: 'v1', title: 'Foto Akad', startTime: '08:00', endTime: '10:00', color: 'bg-blue-500' },
+        { id: 't2', vendorId: 'v1', title: 'Foto Resepsi', startTime: '11:00', endTime: '13:00', color: 'bg-blue-500' },
+        { id: 't3', vendorId: 'v2', title: 'Setup Buffet', startTime: '09:30', endTime: '11:00', color: 'bg-orange-500' },
+        { id: 't4', vendorId: 'v3', title: 'Check Sound', startTime: '09:00', endTime: '10:00', color: 'bg-purple-500' },
+        { id: 't5', vendorId: 'v4', title: 'Makeup CPW', startTime: '07:00', endTime: '09:00', color: 'bg-pink-500' },
+      ];
+
+  // Development mode: Log data source for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('CustomTimeline data source:', {
+      usingDatabaseData: !!(propVendors && propVendors.length > 0),
+      vendorCount: vendors.length,
+      taskCount: tasks.length,
+    });
+  }
 
   return (
     <div className={cn("w-full rounded-xl border bg-background shadow-sm flex flex-col overflow-hidden", className)}>
