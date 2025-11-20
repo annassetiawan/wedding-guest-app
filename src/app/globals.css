@@ -195,12 +195,38 @@
   }
 }
 
-/* --- GANTT CHART FORCE DARK MODE FIXES --- */
+/* --- GANTT CHART HARD OVERRIDES --- */
 
-/* 1. Clean up the Task List (Left Column) */
+/* 1. Force Wrapper Backgrounds to be Dark */
+.dark .gantt-container,
+.dark .gantt-vertical-scroll-container,
+.dark .horizontal-scroll {
+  background-color: hsl(var(--background)) !important;
+  border: none !important;
+}
+
+/* 2. Fix the Zebra Striping (The White Rows in SVG) */
+/* Target the SVG RECT elements specifically */
+.dark rect.grid-row {
+  fill: hsl(var(--background)) !important;
+}
+.dark rect.grid-row:nth-child(even) {
+  fill: hsl(var(--card)) !important; /* Slight contrast for even rows */
+}
+
+/* 3. Fix Header Backgrounds */
+.dark .calendar-header rect {
+  fill: hsl(var(--muted)) !important;
+}
+.dark .calendar-header text {
+  fill: hsl(var(--muted-foreground)) !important;
+  font-weight: 500 !important;
+}
+
+/* 4. Fix Task List (Left Side) */
 .dark .task-list-header {
   background-color: hsl(var(--muted)) !important;
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--muted-foreground)) !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
 .dark .task-list-item {
@@ -208,43 +234,16 @@
   color: hsl(var(--foreground)) !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
-/* Fix the zebra striping by making even rows just slightly different or same as background */
 .dark .task-list-item:nth-child(even) {
   background-color: hsl(var(--card)) !important;
 }
 
-/* 2. Fix the Calendar Grid (Right Column - SVG Elements) */
-/* Force the grid rows to be transparent or match theme */
-.dark .grid-row {
-  fill: hsl(var(--background)) !important;
-}
-.dark .grid-row:nth-child(even) {
-  fill: hsl(var(--card)) !important; /* Match the task list striping */
-}
-
-/* Fix Header Backgrounds (Month/Week names) */
-.dark .calendar-header rect {
-  fill: hsl(var(--muted)) !important;
-}
-.dark .calendar-header text {
-  fill: hsl(var(--muted-foreground)) !important;
-}
-
-/* Fix Borders and Ticks */
+/* 5. Fix Lines and Borders */
 .dark .grid-line {
   stroke: hsl(var(--border)) !important;
+  stroke-width: 1px;
 }
 .dark .calendar-top-tick,
 .dark .calendar-bottom-tick {
   stroke: hsl(var(--border)) !important;
-}
-
-/* 3. Container Fixes */
-.dark .gantt-container {
-  border: none !important;
-  background-color: transparent !important;
-}
-.dark .gantt-vertical-scroll-container {
-  background-color: hsl(var(--background)) !important;
-  border-left: 1px solid hsl(var(--border));
 }
