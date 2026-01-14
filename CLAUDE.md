@@ -28,7 +28,10 @@
 - Real-time analytics dan reporting
 - CSV import/export
 - Public RSVP pages
+- Vendor management & assignment
+- Timeline & Gantt chart planning
 - Dark/light mode
+- Responsive design with collapsible sidebar
 
 ### 🎯 Tujuan dan Use Case
 
@@ -44,9 +47,12 @@
 3. **QR Code System** - Generate unique QR codes untuk setiap guest
 4. **Check-in Tracking** - Scan QR codes saat guest datang ke venue
 5. **Invitation Sharing** - Send personalized invitation links ke guests
-6. **Analytics** - Track attendance rates, guest statistics, dan event metrics
-7. **CSV Import** - Bulk import guest list dari Excel/CSV
-8. **Reports** - Export analytics data untuk dokumentasi
+6. **RSVP Tracking** - Public RSVP pages untuk guests dengan confirmation tracking
+7. **Vendor Management** - Manage vendors (photographers, caterers, etc.) dan assign ke events
+8. **Timeline Planning** - Create dan visualize event timeline dengan Gantt chart
+9. **Analytics** - Track attendance rates, guest statistics, dan event metrics
+10. **CSV Import** - Bulk import guest list dari Excel/CSV
+11. **Reports** - Export analytics data untuk dokumentasi
 
 ### 🛠 Tech Stack
 
@@ -67,8 +73,11 @@
 | **QR Code** | qrcode + ZXing | 1.5.4 / 0.21.3 |
 | **Notifications** | Sonner | 2.0.7 |
 | **Theme** | next-themes | 0.4.6 |
-| **Date Utils** | date-fns | 4.1.0 |
+| **Date Utils** | date-fns + moment | 4.1.0 / 2.30.1 |
 | **CSV** | papaparse | 5.5.3 |
+| **Drag & Drop** | @hello-pangea/dnd | 18.0.1 |
+| **Calendar** | react-big-calendar | 1.19.4 |
+| **Animations** | react-countup | 6.5.3 |
 
 ---
 
@@ -90,12 +99,19 @@ wedding-guest-app/
 │   │   │   ├── create/page.tsx
 │   │   │   └── [id]/
 │   │   │       ├── page.tsx
+│   │   │       ├── overview/page.tsx
+│   │   │       ├── guests/page.tsx
+│   │   │       ├── vendors/page.tsx
+│   │   │       ├── timeline/page.tsx
+│   │   │       ├── analytics/page.tsx
+│   │   │       ├── settings/page.tsx
 │   │   │       ├── edit/page.tsx
 │   │   │       └── checkin/page.tsx
 │   │   ├── guests/page.tsx           # Guest listing
 │   │   ├── invitation/[eventId]/[guestId]/page.tsx
 │   │   ├── templates/page.tsx        # Template library
 │   │   ├── analytics/page.tsx        # Analytics dashboard
+│   │   ├── vendors/page.tsx          # Vendor management
 │   │   ├── settings/                 # User settings
 │   │   │   ├── page.tsx
 │   │   │   ├── profile/page.tsx
@@ -130,12 +146,21 @@ wedding-guest-app/
 │   │   │   └── ...
 │   │   ├── invitation/               # Templates
 │   │   │   ├── ModernTemplate.tsx
-│   │   │   └── ElegantTemplate.tsx
+│   │   │   ├── ElegantTemplate.tsx
+│   │   │   └── RsvpSection.tsx
 │   │   ├── templates/
 │   │   │   ├── TemplateCard.tsx
 │   │   │   └── TemplatePreviewModal.tsx
-│   │   └── checkin/
-│   │       └── ZXingScanner.tsx
+│   │   ├── vendors/                  # Vendor components
+│   │   │   ├── VendorFormDialog.tsx
+│   │   │   └── DeleteVendorDialog.tsx
+│   │   ├── checkin/
+│   │   │   └── ZXingScanner.tsx
+│   │   └── layout/                   # Layout components
+│   │       ├── DashboardHeader.tsx
+│   │       ├── PageLayout.tsx
+│   │       ├── PageHeader.tsx
+│   │       └── SearchFilterBar.tsx
 │   │
 │   ├── lib/                          # Utilities & Services
 │   │   ├── supabase/
@@ -145,6 +170,9 @@ wedding-guest-app/
 │   │   ├── services/
 │   │   │   ├── events.ts             # Event CRUD
 │   │   │   ├── guests.ts             # Guest CRUD
+│   │   │   ├── vendors.ts            # Vendor CRUD
+│   │   │   ├── timelines.ts          # Timeline CRUD
+│   │   │   ├── rsvp.ts               # RSVP handling
 │   │   │   ├── analytics.ts          # Analytics
 │   │   │   ├── dashboard-stats.ts    # Dashboard metrics
 │   │   │   └── profile.ts            # User profile
@@ -428,6 +456,9 @@ export async function middleware(request: NextRequest) {
 |------|---------|-------------|
 | `src/lib/services/events.ts` | `eventService` | `createEvent`, `getEventsByUserId`, `updateEvent`, `deleteEvent` |
 | `src/lib/services/guests.ts` | `guestService` | `createGuest`, `checkInGuest`, `searchGuests`, `getGuestStats` |
+| `src/lib/services/vendors.ts` | `vendorService` | `createVendor`, `getVendorsByUserId`, `assignVendorToEvent`, `removeVendorFromEvent` |
+| `src/lib/services/timelines.ts` | `timelineService` | `createTimelineItem`, `updateTimelineItem`, `deleteTimelineItem`, `getTimelineItems` |
+| `src/lib/services/rsvp.ts` | `rsvpService` | `updateRsvpStatus`, `getRsvpByGuestId` |
 | `src/lib/services/analytics.ts` | `analyticsService` | `getGlobalAnalytics`, `exportAnalyticsToCsv` |
 | `src/lib/services/dashboard-stats.ts` | Functions | `getDashboardStats`, `getMonthlyEventsData` |
 | `src/lib/services/profile.ts` | `profileService` | `updateProfile`, `uploadAvatar`, `deleteAvatar` |
@@ -439,10 +470,17 @@ export async function middleware(request: NextRequest) {
 | `/dashboard` | `src/app/dashboard/page.tsx` | Main dashboard with stats |
 | `/events` | `src/app/events/page.tsx` | Event listing |
 | `/events/create` | `src/app/events/create/page.tsx` | Create event form |
-| `/events/[id]` | `src/app/events/[id]/page.tsx` | Event details & guest list |
+| `/events/[id]` | `src/app/events/[id]/page.tsx` | Event details hub |
+| `/events/[id]/overview` | `src/app/events/[id]/overview/page.tsx` | Event overview |
+| `/events/[id]/guests` | `src/app/events/[id]/guests/page.tsx` | Guest management |
+| `/events/[id]/vendors` | `src/app/events/[id]/vendors/page.tsx` | Vendor assignment |
+| `/events/[id]/timeline` | `src/app/events/[id]/timeline/page.tsx` | Timeline & Gantt chart |
+| `/events/[id]/analytics` | `src/app/events/[id]/analytics/page.tsx` | Event analytics |
 | `/events/[id]/checkin` | `src/app/events/[id]/checkin/page.tsx` | QR scanner check-in |
+| `/vendors` | `src/app/vendors/page.tsx` | Global vendor management |
 | `/analytics` | `src/app/analytics/page.tsx` | Analytics dashboard |
 | `/templates` | `src/app/templates/page.tsx` | Template library |
+| `/invitation/[eventId]/[guestId]` | `src/app/invitation/[eventId]/[guestId]/page.tsx` | Public invitation & RSVP |
 
 #### 4. Key Components
 
@@ -451,10 +489,16 @@ export async function middleware(request: NextRequest) {
 | `StatsCard` | `src/components/dashboard/StatsCard.tsx` | Metric display card |
 | `EventCard` | `src/components/dashboard/EventCard.tsx` | Event preview card |
 | `MonthlyEventsChart` | `src/components/dashboard/MonthlyEventsChart.tsx` | Recharts bar chart |
+| `FixedSidebar` | `src/components/dashboard/FixedSidebar.tsx` | Collapsible sidebar with localStorage |
 | `AddGuestDialog` | `src/components/events/AddGuestDialog.tsx` | Add guest modal form |
+| `VendorFormDialog` | `src/components/vendors/VendorFormDialog.tsx` | Add/edit vendor form |
+| `AssignVendorDialog` | `src/components/events/AssignVendorDialog.tsx` | Assign vendor to event |
+| `EventTimeline` | `src/components/events/EventTimeline.tsx` | Timeline visualization |
+| `TimelineGanttChart` | `src/components/events/TimelineGanttChart.tsx` | Gantt chart with react-big-calendar |
 | `ZXingScanner` | `src/components/checkin/ZXingScanner.tsx` | QR code scanner |
 | `ModernTemplate` | `src/components/invitation/ModernTemplate.tsx` | Modern invitation design |
 | `ElegantTemplate` | `src/components/invitation/ElegantTemplate.tsx` | Elegant invitation design |
+| `RsvpSection` | `src/components/invitation/RsvpSection.tsx` | RSVP form component |
 
 ### 📡 API Endpoints (Supabase)
 
@@ -474,6 +518,30 @@ supabase.from('guests')
 // Guest Check-in
 supabase.from('guests')
   .update({ checked_in: true, checked_in_at: new Date().toISOString() })
+  .eq('id', guestId)
+
+// Vendors
+supabase.from('vendors')
+  .select('*')
+  .eq('user_id', userId)
+
+// Event Vendors (assignments)
+supabase.from('event_vendors')
+  .select('*, vendors(*)')
+  .eq('event_id', eventId)
+
+// Timeline Items
+supabase.from('timeline_items')
+  .select('*')
+  .eq('event_id', eventId)
+  .order('start_date', { ascending: true })
+
+// RSVP
+supabase.from('guests')
+  .update({
+    rsvp_status: 'confirmed',
+    rsvp_at: new Date().toISOString()
+  })
   .eq('id', guestId)
 ```
 
@@ -528,10 +596,16 @@ QR Features:
 ├── qrcode@1.5.4 (Generation)
 └── @zxing/browser@0.1.5 (Scanning)
 
+Planning & Scheduling:
+├── react-big-calendar@1.19.4 (Calendar/Gantt)
+├── @hello-pangea/dnd@18.0.1 (Drag & Drop)
+└── moment@2.30.1 (Date manipulation)
+
 Utils:
 ├── date-fns@4.1.0 (Dates)
 ├── clsx + tailwind-merge (Classes)
-└── next-themes@0.4.6 (Theming)
+├── next-themes@0.4.6 (Theming)
+└── react-countup@6.5.3 (Animations)
 ```
 
 ---
@@ -1156,13 +1230,106 @@ function doSomething(data: Event) {} // Good!
 - **Workaround:** Manual page refresh
 - **Fix:** Implemented in `lib/supabase/middleware.ts`
 
+### 🎉 New Features (v0.2.0)
+
+#### 1. **Vendor Management System**
+Comprehensive vendor management with the following capabilities:
+- **Global Vendor Database** - Create and manage vendors (photographers, caterers, DJs, etc.)
+- **Vendor Categories** - Categorize vendors by type for better organization
+- **Event Assignment** - Assign vendors to specific events with custom pricing
+- **Vendor Details** - Track contact info, pricing, notes, and payment status
+- **Multi-event Support** - Reuse vendors across multiple events
+
+**Key Components:**
+- `/vendors` - Global vendor management page
+- `/events/[id]/vendors` - Event-specific vendor assignments
+- `VendorFormDialog` - Create/edit vendors
+- `AssignVendorDialog` - Assign vendors to events
+
+**Database Tables:**
+- `vendors` - Vendor master data
+- `event_vendors` - Junction table for event-vendor relationships
+
+#### 2. **Timeline & Gantt Chart**
+Visual timeline planning with interactive Gantt chart:
+- **Timeline Items** - Create tasks with start/end dates, descriptions, and vendors
+- **Gantt Visualization** - Interactive calendar view using react-big-calendar
+- **Drag & Drop** - Reorder and reschedule timeline items
+- **Vendor Assignment** - Link timeline items to assigned vendors
+- **Template System** - Apply pre-built timeline templates (coming soon)
+
+**Key Components:**
+- `/events/[id]/timeline` - Timeline management page
+- `EventTimeline` - Timeline list view with drag & drop
+- `TimelineGanttChart` - Gantt chart visualization
+- `TimelineItemDialog` - Create/edit timeline items
+
+**Database Tables:**
+- `timeline_items` - Timeline tasks and milestones
+
+#### 3. **RSVP System**
+Public RSVP pages for guests:
+- **Public Access** - Guests can view invitations without login
+- **RSVP Status** - Guests can confirm, decline, or mark as tentative
+- **Response Tracking** - Track RSVP timestamps and status changes
+- **Template Integration** - RSVP forms integrated with invitation templates
+
+**Key Components:**
+- `/invitation/[eventId]/[guestId]` - Public invitation page
+- `RsvpSection` - RSVP form component
+- `ModernTemplate` & `ElegantTemplate` - Include RSVP functionality
+
+**Database Fields:**
+- `guests.rsvp_status` - confirmed, declined, tentative, pending
+- `guests.rsvp_at` - Timestamp of RSVP submission
+
+#### 4. **Enhanced Event Navigation**
+Tabbed navigation system for events:
+- **Overview Tab** - Quick stats and event summary
+- **Guests Tab** - Guest list management
+- **Vendors Tab** - Vendor assignments
+- **Timeline Tab** - Timeline and Gantt chart
+- **Analytics Tab** - Event-specific analytics
+- **Settings Tab** - Event configuration
+
+**Route Structure:**
+```
+/events/[id]          → Redirects to overview
+/events/[id]/overview → Event dashboard
+/events/[id]/guests   → Guest management
+/events/[id]/vendors  → Vendor assignments
+/events/[id]/timeline → Timeline planning
+/events/[id]/analytics → Event analytics
+/events/[id]/settings → Event settings
+```
+
+#### 5. **Collapsible Sidebar**
+Responsive sidebar with state persistence:
+- **Collapse/Expand** - Toggle sidebar visibility
+- **localStorage Persistence** - Remembers user preference
+- **Smooth Animations** - Transitions for better UX
+- **Responsive Design** - Mobile-friendly behavior
+
+**Implementation:**
+- `FixedSidebar` component with localStorage
+- `data-sidebar-collapsed` attribute on root element
+- CSS transitions for smooth animations
+
 ### 📋 Roadmap / TODO
+
+#### Recently Completed ✅
+- [x] **Vendor Management** - Full CRUD for vendors with event assignment
+- [x] **Timeline & Gantt Chart** - Visual timeline planning with drag & drop
+- [x] **RSVP System** - Public RSVP pages with status tracking
+- [x] **Collapsible Sidebar** - Responsive sidebar with localStorage persistence
+- [x] **Event Navigation Tabs** - Overview, Guests, Vendors, Timeline, Analytics, Settings
 
 #### High Priority
 - [ ] **Testing Framework Setup** - Jest + React Testing Library
 - [ ] **E2E Tests** - Critical user flows
 - [ ] **Performance Optimization** - Code splitting, lazy loading
 - [ ] **Mobile Optimization** - PWA support
+- [ ] **Budget Tracking** - Track expenses by vendor and category
 
 #### Medium Priority
 - [ ] **Export to PDF** - Generate invitation PDFs
@@ -1170,12 +1337,14 @@ function doSomething(data: Event) {} // Good!
 - [ ] **SMS Notifications** - Check-in alerts
 - [ ] **Multi-language** - i18n support (EN/ID)
 - [ ] **More Templates** - Traditional, Minimalist, Luxury
+- [ ] **Template Presets** - Pre-built timeline templates for different event types
 
 #### Low Priority
 - [ ] **Admin Dashboard** - Super admin panel
 - [ ] **Payment Integration** - Premium features
 - [ ] **Analytics Export** - Multiple formats (Excel, PDF)
 - [ ] **Team Collaboration** - Multi-user events
+- [ ] **Vendor Recommendations** - AI-powered vendor suggestions
 
 #### Documentation
 - [ ] API Reference completion
@@ -1267,9 +1436,9 @@ git push origin feature/guest-bulk-delete
 
 ---
 
-**Last Updated:** January 2025
-**Version:** 0.1.0
-**Status:** MVP Complete - Ready for Production
+**Last Updated:** November 2025
+**Version:** 0.2.0
+**Status:** Feature-Rich - Production Ready with Vendor & Timeline Management
 
 ---
 

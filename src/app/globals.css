@@ -194,3 +194,55 @@
     @apply transition-all duration-200 ease-in-out;
   }
 }
+
+/* --- FINAL GANTT CHART FIXES --- */
+
+/* 1. CONTAINER BACKGROUND (Fixes the "Not Full Width" visual bug) */
+/* Forces the empty space to match the theme background */
+.dark .gantt-container,
+.dark .gantt-vertical-scroll-container,
+.dark .horizontal-scroll,
+.dark .gantt-wrapper {
+  background-color: hsl(var(--background)) !important;
+  border: none !important;
+}
+
+/* 2. GRID ROWS (The White Stripes) */
+/* Target the SVG rect elements specifically */
+.dark .grid-row {
+  fill: hsl(var(--background)) !important;
+}
+.dark .grid-row:nth-child(even) {
+  fill: hsl(var(--card)) !important; /* Subtle zebra stripe using Card color */
+}
+
+/* 3. TASK LIST (Left Side Text) */
+.dark .task-list-header {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+/* Force background to match theme so white text is readable */
+.dark .task-list-item {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+.dark .task-list-item:nth-child(even) {
+  background-color: hsl(var(--card)) !important;
+}
+
+/* 4. CALENDAR HEADER (Dates at top) */
+.dark .calendar-header rect {
+  fill: hsl(var(--muted)) !important;
+}
+.dark .calendar-header text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+
+/* 5. TICKS & LINES */
+.dark .grid-line,
+.dark .calendar-top-tick,
+.dark .calendar-bottom-tick {
+  stroke: hsl(var(--border)) !important;
+}
